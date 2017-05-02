@@ -1,0 +1,59 @@
+* {
+    margin: 0;
+}
+
+html,
+.qpresent-page-outer-container {
+    overflow: hidden;
+}
+
+.qpresent-page-content.qpresent-title {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.qpresent-page {
+    position: relative;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: table;
+}
+
+.qpresent-page-number {
+    position: absolute;
+}
+
+@page {
+    size: A4 landscape;
+    margin: 0;
+}
+
+@media print {
+    body {
+        -webkit-print-color-adjust: exact;
+    }
+
+    .qpresent-page {
+        page-break-after: always;
+    }
+}
+
+@media screen {
+    body {
+        background: black;
+    }
+
+    .qpresent-page-outer-container {
+        position: absolute;
+        margin: auto;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+
+    .qpresent-page {
+        transform-origin: 0 0;
+    }
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.6/marked.js"></script>
+
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.11.0/highlight.min.js"></script>
+        <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.11.0/styles/vs.min.css" />
+
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js"></script>
+        <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" />
+
+        <script type="text/javascript" src="js/qpresent.js"></script>
+        <link type="text/css" rel="stylesheet" href="css/qpresent.css" />
+        <link type="text/css" rel="stylesheet" href="css/qpresent-style.css" />
+        <link type="text/css" rel="stylesheet" href="css/line-numbers.css" />
+
+        <script type="text/javascript" src="js/block.js"></script>
+
+        <link href="https://fonts.googleapis.com/earlyaccess/sawarabimincho.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/earlyaccess/notosansjapanese.css" rel="stylesheet" />
+
+    </head>
+    <body>
+        <section id="slide" data-slide="sample.md">
+        </section>
+        <script>
+            var slideElem;
+            var qpresent;
+
+            document.addEventListener('DOMContentLoaded', function() {
+                slideElem = document.getElementById('slide');
+
+                var xhr = new XMLHttpRequest();
+
+                xhr.open("GET", slideElem.dataset.slide, false);
+                xhr.send(null);
+
+                var content;
+
+                if (xhr.status == 200) {
+                    content = xhr.responseText;
+                } else {
+                    content = '# Error ' + xhr.response.code;
+                }
+
+                qpresent = new QPresent.Manager(slideElem, content);
+                qpresent.registerPrintListener();
+            });
+
+            window.addEventListener('resize', function() {
+                qpresent.onResize();
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.keyCode == 37 || e.keyCode == 38 || e.key == 'p') {
+                    qpresent.prevPage();
+                } else if (e.keyCode == 39 || e.keyCode == 40 || e.key == 'n' || e.key == ' ') {
+                    qpresent.nextPage();
+                }
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,16 @@
+.line-numbers {
+  counter-reset: line;
+}
+
+pre.line-numbers{
+  width: auto;
+}
+
+span.line-number {
+  counter-increment: line;
+}
+
+span.line-number:before {
+  content: counter(line, decimal-leading-zero);
+  color: gray;
+}

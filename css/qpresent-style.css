@@ -1,0 +1,65 @@
+body {
+    font-family: "Sawarabi Mincho", serif;
+    font-size: 7mm;
+}
+
+h1, h2, h3, h4, h5, h6{
+    font-weight: bold;
+    text-align: center;
+}
+
+h1 {
+    font-size: 15mm;
+    border-bottom: 1px solid;
+    margin-bottom: 5mm;
+}
+
+strong {
+    font-family: 'Noto Sans Japanese', sans-serif;
+}
+
+.code-table {
+    width: 100%;
+    border: solid;
+    border-width: 1px;
+}
+
+pre, code.hljs, span.line-number {
+    font-family: 'Courier New', monospace;
+    font-size: 5mm;
+    padding: 0;
+}
+
+code.hljs {
+    overflow: visible;
+}
+
+.code-container {
+    width: 100%;
+}
+
+/*pre, .line-number-container {
+    line-height: 0.9em;
+}*/
+
+.block {
+    margin-bottom: 3mm;
+}
+
+.qpresent-page, .qpresent-page-inner-container {
+    background: white !important;
+}
+
+.qpresent-page {
+    padding: 5mm;
+}
+
+.qpresent-page-number {
+    font-size: 6mm;
+    right: 5mm;
+    bottom: 5mm;
+}
+
+.qpresent-page-number-separator {
+    margin: 0 1mm;
+}
