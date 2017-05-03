@@ -4,6 +4,14 @@
 
 ## 作者<br>所属
 
+
+---
+
+# PDF
+
+- [Chrome~で変換したやつ](http://gh-pages.quart.red/qpresent-js/chrome.pdf)
+- [Firefox~で変換したやつ](http://gh-pages.quart.red/qpresent-js/firefox.pdf)
+
 ---
 
 # 装飾
