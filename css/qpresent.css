@@ -40,7 +40,7 @@ html,
 }
 
 @media screen {
-    body {
+    html, body {
         background: black;
     }
 

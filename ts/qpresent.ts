@@ -4,6 +4,15 @@
 /// <reference path="katex-auto-render.d.ts" />
 /// <reference path="block.ts" />
 
+interface Document {
+    mozCancelFullScreen: () => void;
+    mozFullScreenElement: () => void;
+}
+
+interface HTMLElement {
+    mozRequestFullScreen: () => void;
+}
+
 module QPresent {
     class QPresentOption {
         pageDelimiter?: string;
@@ -234,6 +243,30 @@ module QPresent {
         prevPage() {
             if (this.currentPage > 0) {
                 this.jumpTo(this.currentPage - 1);
+            }
+        }
+
+        requestFullscreen() {
+            let element = document.documentElement;
+            let method = element.requestFullscreen ||
+                element.webkitRequestFullScreen ||
+                element.webkitRequestFullscreen ||
+                element.mozRequestFullScreen;
+
+            if (method) {
+                method.call(element);
+            }
+        }
+
+        exitFullscreen() {
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                let method = document.exitFullscreen ||
+                    document.webkitExitFullscreen ||
+                    document.mozCancelFullScreen;
+
+                if (method) {
+                    method.call(document);
+                }
             }
         }
 
