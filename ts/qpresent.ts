@@ -191,7 +191,6 @@ module QPresent {
                 let page = newPage();
 
                 page.outerContainerElem.id = 'qpresent-page-' + index;
-                page.outerContainerElem.style.display = 'none';
                 page.pageContentElem.innerHTML = makePageContent(pageContent);
                 page.pageElem.appendChild(makePageNumber(index+1, pages.length));
                 page.pageElem.style.width = `${options.pageWidth}px`;
@@ -210,8 +209,13 @@ module QPresent {
             });
 
             this.currentPage = 0;
-            this.onResize();
-            this.jumpTo(0);
+
+            setTimeout(() => {
+                for (let p of this.pages)
+                    p.outerContainerElem.style.display = 'none';
+                this.onResize();
+                this.jumpTo(0);
+            }, 1);
         }
 
         jumpTo(pageIndex: number) {
