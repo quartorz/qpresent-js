@@ -246,7 +246,7 @@ var QPresent;
             var _this = this;
             if (isChrome) {
                 window.matchMedia('print').addListener(function (m) {
-                    if (m.media.indexOf('print') != -1) {
+                    if (m.matches) {
                         _this.beforePrint();
                         setTimeout(function () { return _this.afterPrint(); }, 1);
                     }
