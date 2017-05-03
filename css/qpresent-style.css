@@ -18,6 +18,11 @@ strong {
     font-family: 'Noto Sans Japanese', sans-serif;
 }
 
+em {
+    font-style: oblique;
+    font-family: 'Times New Roman', Times, serif;
+}
+
 .code-table {
     width: 100%;
     border: solid;
