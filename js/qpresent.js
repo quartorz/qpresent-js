@@ -144,7 +144,6 @@ var QPresent;
             pages.forEach(function (pageContent, index) {
                 var page = newPage();
                 page.outerContainerElem.id = 'qpresent-page-' + index;
-                page.outerContainerElem.style.display = 'none';
                 page.pageContentElem.innerHTML = makePageContent(pageContent);
                 page.pageElem.appendChild(makePageNumber(index + 1, pages.length));
                 page.pageElem.style.width = options.pageWidth + "px";
@@ -159,8 +158,14 @@ var QPresent;
                 _this.pages.push(page);
             });
             this.currentPage = 0;
-            this.onResize();
-            this.jumpTo(0);
+            setTimeout(function () {
+                for (var _i = 0, _a = _this.pages; _i < _a.length; _i++) {
+                    var p = _a[_i];
+                    p.outerContainerElem.style.display = 'none';
+                }
+                _this.onResize();
+                _this.jumpTo(0);
+            }, 1);
         }
         Manager.prototype.jumpTo = function (pageIndex) {
             this.pages[this.currentPage].outerContainerElem.style.display = 'none';
