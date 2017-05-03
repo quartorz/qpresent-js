@@ -183,6 +183,26 @@ var QPresent;
                 this.jumpTo(this.currentPage - 1);
             }
         };
+        Manager.prototype.requestFullscreen = function () {
+            var element = document.documentElement;
+            var method = element.requestFullscreen ||
+                element.webkitRequestFullScreen ||
+                element.webkitRequestFullscreen ||
+                element.mozRequestFullScreen;
+            if (method) {
+                method.call(element);
+            }
+        };
+        Manager.prototype.exitFullscreen = function () {
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                var method = document.exitFullscreen ||
+                    document.webkitExitFullscreen ||
+                    document.mozCancelFullScreen;
+                if (method) {
+                    method.call(document);
+                }
+            }
+        };
         Manager.prototype.onResize = function () {
             var w = window.innerWidth;
             var h = window.innerHeight;
