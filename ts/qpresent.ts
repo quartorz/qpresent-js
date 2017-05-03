@@ -319,7 +319,7 @@ module QPresent {
         registerPrintListener() {
             if (isChrome) {
                 window.matchMedia('print').addListener(m => {
-                    if (m.media.indexOf('print') != -1) {
+                    if (m.matches) {
                         this.beforePrint();
                         setTimeout(() => this.afterPrint(), 1);
                     }
