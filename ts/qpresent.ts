@@ -68,7 +68,7 @@ module QPresent {
     }
 
     function makePageContent(content: string): string {
-        return marked(content.replace(/([^\\])~/g, '$1&#x2005;'));
+        return marked(content.replace(/([^\\])~/g, '$1&#x2006;'));
     }
 
     function makePageNumber(index: number, totalNum: number): HTMLElement {
@@ -91,6 +91,27 @@ module QPresent {
         pageNum.appendChild(totalNumElem);
 
         return pageNum;
+    }
+
+    function makeNavigationButtons(): HTMLElement {
+        let container = document.createElement('span');
+        let prev = document.createElement('input');
+        let buttonSep = document.createElement('span');
+        let next = document.createElement('input');
+
+        container.classList.add('qpresent-navigation-button-container');
+        prev.classList.add('qpresent-prev-button', 'qpresent-navigation-button');
+        buttonSep.classList.add('qpresent-navigation-button-separator');
+        next.classList.add('qpresent-next-button', 'qpresent-navigation-button');
+
+        prev.type = 'button';
+        next.type = 'button';
+
+        container.appendChild(prev);
+        container.appendChild(buttonSep);
+        container.appendChild(next);
+
+        return container;
     }
 
     let slideAttrRegExp = /^\s*.slide:\s*/g;
@@ -185,7 +206,9 @@ module QPresent {
         pages: Page[];
         currentPage: number;
         pageSize: [number, number];
-        zoomRate: number;
+        zoomRate: number
+        overlayElem: HTMLElement;
+        buttonContainer: HTMLElement;
 
         constructor(elem: HTMLElement, content: string, options: QPresentOption = defaultOption) {
             options = Object.assign(QPresentOption.default(), options);
@@ -216,6 +239,23 @@ module QPresent {
                 this.element.appendChild(page.outerContainerElem);
                 this.pages.push(page);
             });
+
+            this.overlayElem = document.createElement('div');
+            this.overlayElem.classList.add('qpresent-overlay');
+
+            this.buttonContainer = makeNavigationButtons();
+
+            this.overlayElem.appendChild(this.buttonContainer);
+            this.element.appendChild(this.overlayElem);
+
+            let prevButton = this.buttonContainer.getElementsByClassName('qpresent-prev-button')[0] as HTMLInputElement;
+            let nextButton = this.buttonContainer.getElementsByClassName('qpresent-next-button')[0] as HTMLInputElement;
+
+            prevButton.value = 'prev';
+            nextButton.value = 'next';
+
+            prevButton.addEventListener('click', e => this.prevPage());
+            nextButton.addEventListener('click', e => this.nextPage());
 
             this.currentPage = 0;
 
@@ -293,6 +333,9 @@ module QPresent {
             this.pages[pageIndex].innerContainerElem.style.height = `${h}px`;
             this.pages[pageIndex].outerContainerElem.style.width = `${w}px`;
             this.pages[pageIndex].outerContainerElem.style.height = `${h}px`;
+            this.buttonContainer.style.transform = `scale(${r}, ${r})`;
+            this.overlayElem.style.width = `${w}px`;
+            this.overlayElem.style.height = `${h}px`;
         }
 
         resizeCurrentPage() {
@@ -321,7 +364,7 @@ module QPresent {
                 window.matchMedia('print').addListener(m => {
                     if (m.matches) {
                         this.beforePrint();
-                        setTimeout(() => this.afterPrint(), 1);
+                        setTimeout(() => this.afterPrint(), 0);
                     }
                 });
             } else if (window.onbeforeprint !== undefined) {

@@ -24,6 +24,15 @@ html,
     position: absolute;
 }
 
+.qpresent-overlay {
+    pointer-events: none;
+}
+
+.qpresent-navigation-button-container {
+    pointer-events: auto;
+    transform-origin: left bottom;
+}
+
 @page {
     size: A4 landscape;
     margin: 0;
@@ -37,6 +46,10 @@ html,
     .qpresent-page {
         page-break-after: always;
     }
+
+    .qpresent-overlay {
+        display: none;
+    }
 }
 
 @media screen {
@@ -44,7 +57,8 @@ html,
         background: black;
     }
 
-    .qpresent-page-outer-container {
+    .qpresent-page-outer-container,
+    .qpresent-overlay {
         position: absolute;
         margin: auto;
         top: 0;

@@ -68,3 +68,52 @@ code.hljs {
 .qpresent-page-number-separator {
     margin: 0 1mm;
 }
+
+
+.qpresent-navigation-button-container {
+    position: absolute;
+    left: 3mm;
+    bottom: 3mm;
+}
+
+.qpresent-navigation-button-separator {
+    margin-left: 30px;
+}
+
+.qpresent-navigation-button {
+    width: 0;
+    height: 0;
+    padding: 0;
+    background: none;
+}
+
+.qpresent-prev-button {
+    border-top: 15px solid transparent;
+    border-right: 15px solid black;
+    border-bottom: 15px solid transparent;
+    border-left: 15px solid transparent;
+}
+
+.qpresent-prev-button:hover {
+    border-right-color: lightgray;
+}
+
+.qpresent-prev-button:active {
+    border-right-color: gray;
+}
+
+.qpresent-next-button {
+    padding-left: 5px;
+    border-top: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-bottom: 15px solid transparent;
+    border-left: 15px solid black;
+}
+
+.qpresent-next-button:hover {
+    border-left-color: lightgray;
+}
+
+.qpresent-next-button:active {
+    border-left-color: gray;
+}
