@@ -126,6 +126,10 @@ module QPresent {
         while (match !== null) {
             if (match[1] == 'class') {
                 elem.classList.add(...match[2].split(/\s+/g));
+            } else if (match[1] == 'style') {
+                elem.style.cssText += match[2];
+            } else {
+                elem.setAttribute(match[1], match[2]);
             }
 
             match = attributeRegExp.exec(attr);
@@ -142,6 +146,20 @@ module QPresent {
             if (matched) {
                 addAttributesInElement(topmostElem, elem.data.substr(slideAttrRegExp.lastIndex));
             }
+
+            matched = elementAttrRegExp.test(elem.data);
+
+            if (matched) {
+                let dest: HTMLElement;
+
+                if (!prevNode || prevNode.nodeType != Node.ELEMENT_NODE) {
+                    dest = node.parentElement;
+                } else {
+                    dest = prevNode as HTMLElement;
+                }
+
+                addAttributesInElement(dest, elem.data.substr(elementAttrRegExp.lastIndex));
+            }
         }
 
         if (node.hasChildNodes()) {
@@ -151,11 +169,6 @@ module QPresent {
         let next = node.nextSibling;
 
         while (next !== null) {
-            if (next.nodeType != Node.ELEMENT_NODE && next.nodeType != Node.COMMENT_NODE) {
-                next = next.nextSibling;
-                continue;
-            }
-
             addAttributes(topmostElem, next, node);
             node = next;
             next = next.nextSibling;
