@@ -311,8 +311,8 @@ module QPresent {
         }
 
         onResize() {
-            let w = window.innerWidth;
-            let h = window.innerHeight;
+            let w = document.documentElement.clientWidth;
+            let h = document.documentElement.clientHeight;
 
             if (w / h > this.pageSize[0] / this.pageSize[1]) {
                 this.zoomRate = h / this.pageSize[1];

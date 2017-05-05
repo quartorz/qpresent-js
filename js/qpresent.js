@@ -231,8 +231,8 @@ var QPresent;
             }
         };
         Manager.prototype.onResize = function () {
-            var w = window.innerWidth;
-            var h = window.innerHeight;
+            var w = document.documentElement.clientWidth;
+            var h = document.documentElement.clientHeight;
             if (w / h > this.pageSize[0] / this.pageSize[1]) {
                 this.zoomRate = h / this.pageSize[1];
             }
