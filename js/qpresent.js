@@ -121,7 +121,7 @@ var QPresent;
     }
     var slideAttrRegExp = /^\s*.slide:\s*/g;
     var elementAttrRegExp = /^\s*.element:\s*/g;
-    var attributeRegExp = /\s*(.*)="(.*)"/g;
+    var attributeRegExp = /\s*(.*?)="(.*?)"/g;
     function addAttributesInElement(elem, attr) {
         attributeRegExp.lastIndex = 0;
         var match = attributeRegExp.exec(attr);
@@ -140,6 +140,11 @@ var QPresent;
         var _a;
     }
     function addAttributes(topmostElem, node, prevNode) {
+        if (node.nodeType == Node.ELEMENT_NODE
+            && (node.tagName == 'PRE'
+                || node.classList.contains('katex'))) {
+            return;
+        }
         if (node.nodeType == Node.COMMENT_NODE) {
             slideAttrRegExp.lastIndex = 0;
             var elem = node;
@@ -147,10 +152,22 @@ var QPresent;
             if (matched) {
                 addAttributesInElement(topmostElem, elem.data.substr(slideAttrRegExp.lastIndex));
             }
+            elementAttrRegExp.lastIndex = 0;
             matched = elementAttrRegExp.test(elem.data);
             if (matched) {
                 var dest = void 0;
                 if (!prevNode || prevNode.nodeType != Node.ELEMENT_NODE) {
+                    /*if (prevNode.nodeType == Node.TEXT_NODE && prevNode.textContent.trim().length == 0) {
+                        if (prevNode.previousSibling
+                            && prevNode.previousSibling.nodeType == Node.ELEMENT_NODE
+                        ) {
+                            dest = prevNode.previousSibling as HTMLElement;
+                        } else {
+                            dest = node.parentElement;
+                        }
+                    } else {
+                        dest = node.parentElement;
+                    }*/
                     dest = node.parentElement;
                 }
                 else {

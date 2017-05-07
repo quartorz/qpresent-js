@@ -170,7 +170,7 @@ module QPresent {
 
     let slideAttrRegExp = /^\s*.slide:\s*/g;
     let elementAttrRegExp = /^\s*.element:\s*/g;
-    let attributeRegExp = /\s*(.*)="(.*)"/g;
+    let attributeRegExp = /\s*(.*?)="(.*?)"/g;
 
     function addAttributesInElement(elem: HTMLElement, attr: string) {
         attributeRegExp.lastIndex = 0;
@@ -191,6 +191,14 @@ module QPresent {
     }
 
     function addAttributes(topmostElem: HTMLElement, node: Node, prevNode: Node): void {
+        if (node.nodeType == Node.ELEMENT_NODE
+            && ((node as HTMLElement).tagName == 'PRE'
+                || (node as HTMLElement).classList.contains('katex')
+            )
+        ) {
+            return;
+        }
+
         if (node.nodeType == Node.COMMENT_NODE) {
             slideAttrRegExp.lastIndex = 0;
 
@@ -201,12 +209,24 @@ module QPresent {
                 addAttributesInElement(topmostElem, elem.data.substr(slideAttrRegExp.lastIndex));
             }
 
+            elementAttrRegExp.lastIndex = 0;
             matched = elementAttrRegExp.test(elem.data);
 
             if (matched) {
                 let dest: HTMLElement;
 
                 if (!prevNode || prevNode.nodeType != Node.ELEMENT_NODE) {
+                    /*if (prevNode.nodeType == Node.TEXT_NODE && prevNode.textContent.trim().length == 0) {
+                        if (prevNode.previousSibling
+                            && prevNode.previousSibling.nodeType == Node.ELEMENT_NODE
+                        ) {
+                            dest = prevNode.previousSibling as HTMLElement;
+                        } else {
+                            dest = node.parentElement;
+                        }
+                    } else {
+                        dest = node.parentElement;
+                    }*/
                     dest = node.parentElement;
                 } else {
                     dest = prevNode as HTMLElement;
