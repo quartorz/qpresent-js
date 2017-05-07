@@ -23,32 +23,77 @@ em {
     font-family: 'Times New Roman', Times, serif;
 }
 
-.code-table {
+.qpresent-code-table {
     width: 100%;
     border: solid;
     border-width: 1px;
 }
 
-pre, code.hljs, span.line-number {
+pre, code.hljs, span.qpresent-line-number {
     font-family: 'Courier New', monospace;
     font-size: 5mm;
     padding: 0;
+}
+
+.qpresent-line-number-container {
+    margin-right: 3mm;
 }
 
 code.hljs {
     overflow: visible;
 }
 
-.code-container {
+.qpresent-code-container {
     width: 100%;
 }
 
-/*pre, .line-number-container {
-    line-height: 0.9em;
-}*/
+span.qpresent-line-number:before {
+  content: counter(line, decimal-leading-zero);
+  color: gray;
+}
 
 .block {
     margin-bottom: 3mm;
+    border-radius: 15px;
+    box-shadow: rgba(128, 128, 128, 0.5) 3px 3px 7px;
+}
+
+.block-title {
+    padding: 5px 10px;
+    border-radius: 15px 15px 0 0;
+    color: white;
+}
+
+.block-content {
+    color: black;
+    padding: 1px 10px 1px 10px;
+    border-radius: 0 0 15px 15px;
+}
+
+.block[block-type="default"] .block-title,
+.block[block-type="definition"] .block-title {
+    background-color: rgb(140, 140, 255);
+}
+
+.block[block-type="default"] .block-content,
+.block[block-type="definition"] .block-content {
+    background-color: rgb(240, 240, 255);
+}
+
+.block[block-type="alert"] .block-title {
+    background-color: rgb(255, 100, 100);
+}
+
+.block[block-type="alert"] .block-content {
+    background-color: rgb(255, 235, 235);
+}
+
+.block[block-type="example"] .block-title {
+    background-color: rgb(100, 255, 100);
+}
+
+.block[block-type="example"] .block-content {
+    background-color: rgb(230, 255, 230);
 }
 
 .qpresent-page, .qpresent-page-inner-container {

@@ -2,15 +2,16 @@
 /// <reference path="highlight.js/index.d.ts" />
 /// <reference path="katex/index.d.ts" />
 /// <reference path="katex-auto-render.d.ts" />
-/// <reference path="block.ts" />
 var QPresent;
 (function (QPresent) {
+    'use strict';
     var QPresentOption = (function () {
         function QPresentOption() {
         }
         QPresentOption["default"] = function () {
             return {
-                pageDelimiter: '^---$',
+                pageDelimiter: '^------$',
+                columnDelimiter: '^\\*\\*\\*$',
                 pageWidth: 1122,
                 pageHeight: 792,
                 mathDelimiter: [
@@ -43,8 +44,46 @@ var QPresent;
             pageContentElem: pageContentElem
         };
     }
-    function makePageContent(content) {
-        return marked(content.replace(/([^\\])~/g, '$1&#x2006;'));
+    function makePageContent(content, colDelim) {
+        var c = content.replace(/\\\r?\n\s*/g, '').replace(/([^\\])~/g, '$1&#x2006;').replace(/\\~/g, '~');
+        if (!colDelim)
+            return marked(c);
+        colDelim.lastIndex = 0;
+        content = '';
+        var lastIndex = 0;
+        var e;
+        var headRange = [0, 0];
+        var leftRange = [0, 0];
+        var rightRange = [0, 0];
+        for (;;) {
+            lastIndex = colDelim.lastIndex;
+            headRange[0] = colDelim.lastIndex;
+            if (!(e = colDelim.exec(c)))
+                break;
+            headRange[1] = e.index;
+            leftRange[0] = colDelim.lastIndex;
+            if (!(e = colDelim.exec(c)))
+                break;
+            leftRange[1] = e.index;
+            rightRange[0] = colDelim.lastIndex;
+            if (!(e = colDelim.exec(c)))
+                break;
+            rightRange[1] = e.index;
+            content += marked(c.substring(headRange[0], headRange[1]));
+            var container = document.createElement('div');
+            var left = document.createElement('div');
+            var right = document.createElement('div');
+            container.classList.add('qpresent-twocol-container');
+            left.classList.add('qpresent-twocol-left');
+            right.classList.add('qpresent-twocol-right');
+            left.innerHTML = marked(c.substring(leftRange[0], leftRange[1]));
+            right.innerHTML = marked(c.substring(rightRange[0], rightRange[1]));
+            container.appendChild(left);
+            container.appendChild(right);
+            content += container.outerHTML;
+        }
+        content += marked((lastIndex == 0) ? c : c.substr(lastIndex));
+        return content;
     }
     function makePageNumber(index, totalNum) {
         var pageNum = document.createElement('span');
@@ -81,7 +120,7 @@ var QPresent;
     }
     var slideAttrRegExp = /^\s*.slide:\s*/g;
     var elementAttrRegExp = /^\s*.element:\s*/g;
-    var attributeRegExp = /\s*(.*)="(.*)"/g;
+    var attributeRegExp = /\s*(.*?)="(.*?)"/g;
     function addAttributesInElement(elem, attr) {
         attributeRegExp.lastIndex = 0;
         var match = attributeRegExp.exec(attr);
@@ -100,6 +139,11 @@ var QPresent;
         var _a;
     }
     function addAttributes(topmostElem, node, prevNode) {
+        if (node.nodeType == Node.ELEMENT_NODE
+            && (node.tagName == 'PRE'
+                || node.classList.contains('katex'))) {
+            return;
+        }
         if (node.nodeType == Node.COMMENT_NODE) {
             slideAttrRegExp.lastIndex = 0;
             var elem = node;
@@ -107,10 +151,22 @@ var QPresent;
             if (matched) {
                 addAttributesInElement(topmostElem, elem.data.substr(slideAttrRegExp.lastIndex));
             }
+            elementAttrRegExp.lastIndex = 0;
             matched = elementAttrRegExp.test(elem.data);
             if (matched) {
                 var dest = void 0;
                 if (!prevNode || prevNode.nodeType != Node.ELEMENT_NODE) {
+                    /*if (prevNode.nodeType == Node.TEXT_NODE && prevNode.textContent.trim().length == 0) {
+                        if (prevNode.previousSibling
+                            && prevNode.previousSibling.nodeType == Node.ELEMENT_NODE
+                        ) {
+                            dest = prevNode.previousSibling as HTMLElement;
+                        } else {
+                            dest = node.parentElement;
+                        }
+                    } else {
+                        dest = node.parentElement;
+                    }*/
                     dest = node.parentElement;
                 }
                 else {
@@ -124,7 +180,8 @@ var QPresent;
         }
         var next = node.nextSibling;
         while (next !== null) {
-            addAttributes(topmostElem, next, node);
+            if (next.nodeType != Node.TEXT_NODE)
+                addAttributes(topmostElem, next, node);
             node = next;
             next = next.nextSibling;
         }
@@ -144,17 +201,17 @@ var QPresent;
         var lineNumsContainer = document.createElement('pre');
         var codeElem = document.createElement('td');
         var lineCount = code.split('\n').length;
-        lineNumsContainer.classList.add('line-number-container');
+        lineNumsContainer.classList.add('qpresent-line-number-container');
         for (var i = 0; i < lineCount; ++i) {
-            lineNumsContainer.innerHTML += '<span class="line-number"></span>\n';
+            lineNumsContainer.innerHTML += '<span class="qpresent-line-number"></span>\n';
         }
         lineNums.appendChild(lineNumsContainer);
-        codeElem.classList.add('code-container');
+        codeElem.classList.add('qpresent-code-container');
         codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code).value + '</code></pre>';
         tr.appendChild(lineNums);
         tr.appendChild(codeElem);
         table.appendChild(tr);
-        table.classList.add('code-table');
+        table.classList.add('qpresent-code-table');
         return table.outerHTML;
     };
     marked.setOptions({
@@ -169,11 +226,12 @@ var QPresent;
             this.pages = [];
             this.pageSize = [options.pageWidth, options.pageHeight];
             var pageDelim = new RegExp(options.pageDelimiter, 'm');
+            var colDelim = new RegExp(options.columnDelimiter, 'mg');
             var pages = content.split(pageDelim);
             pages.forEach(function (pageContent, index) {
                 var page = newPage();
                 page.outerContainerElem.id = 'qpresent-page-' + index;
-                page.pageContentElem.innerHTML = makePageContent(pageContent);
+                page.pageContentElem.innerHTML = makePageContent(pageContent, colDelim);
                 page.pageElem.appendChild(makePageNumber(index + 1, pages.length));
                 page.pageElem.style.width = options.pageWidth + "px";
                 page.pageElem.style.height = options.pageHeight + "px";
@@ -181,7 +239,9 @@ var QPresent;
                     delimiters: options.mathDelimiter,
                     ignoredTags: []
                 });
-                makeBlock(page.pageElem, function (c) { return marked(c); });
+                Array.prototype.forEach.call(page.pageElem.getElementsByClassName('block-content'), function (e) {
+                    e.innerHTML = marked(e.innerHTML);
+                });
                 addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
                 _this.element.appendChild(page.outerContainerElem);
                 _this.pages.push(page);
