@@ -14,6 +14,8 @@ interface HTMLElement {
 }
 
 module QPresent {
+    'use strict';
+
     class QPresentOption {
         pageDelimiter?: string;
         pageWidth?: number;
@@ -22,7 +24,7 @@ module QPresent {
 
         static default(): QPresentOption {
             return {
-                pageDelimiter: '^---$',
+                pageDelimiter: '^------$',
                 pageWidth: 1122,    // 297mm
                 pageHeight: 792,    // 210mm
                 mathDelimiter: [
@@ -169,7 +171,8 @@ module QPresent {
         let next = node.nextSibling;
 
         while (next !== null) {
-            addAttributes(topmostElem, next, node);
+            if (next.nodeType != Node.TEXT_NODE)
+                addAttributes(topmostElem, next, node);
             node = next;
             next = next.nextSibling;
         }
@@ -193,19 +196,19 @@ module QPresent {
         let codeElem = document.createElement('td');
         let lineCount = code.split('\n').length;
 
-        lineNumsContainer.classList.add('line-number-container');
+        lineNumsContainer.classList.add('qpresent-line-number-container');
         for(let i = 0; i < lineCount; ++i) {
-            lineNumsContainer.innerHTML += '<span class="line-number"></span>\n';
+            lineNumsContainer.innerHTML += '<span class="qpresent-line-number"></span>\n';
         }
         lineNums.appendChild(lineNumsContainer);
 
-        codeElem.classList.add('code-container');
+        codeElem.classList.add('qpresent-code-container');
         codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code).value + '</code></pre>';
 
         tr.appendChild(lineNums);
         tr.appendChild(codeElem);
         table.appendChild(tr);
-        table.classList.add('code-table');
+        table.classList.add('qpresent-code-table');
 
         return table.outerHTML;
     };

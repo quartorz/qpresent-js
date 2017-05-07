@@ -5,12 +5,13 @@
 /// <reference path="block.ts" />
 var QPresent;
 (function (QPresent) {
+    'use strict';
     var QPresentOption = (function () {
         function QPresentOption() {
         }
         QPresentOption["default"] = function () {
             return {
-                pageDelimiter: '^---$',
+                pageDelimiter: '^------$',
                 pageWidth: 1122,
                 pageHeight: 792,
                 mathDelimiter: [
@@ -124,7 +125,8 @@ var QPresent;
         }
         var next = node.nextSibling;
         while (next !== null) {
-            addAttributes(topmostElem, next, node);
+            if (next.nodeType != Node.TEXT_NODE)
+                addAttributes(topmostElem, next, node);
             node = next;
             next = next.nextSibling;
         }
@@ -144,17 +146,17 @@ var QPresent;
         var lineNumsContainer = document.createElement('pre');
         var codeElem = document.createElement('td');
         var lineCount = code.split('\n').length;
-        lineNumsContainer.classList.add('line-number-container');
+        lineNumsContainer.classList.add('qpresent-line-number-container');
         for (var i = 0; i < lineCount; ++i) {
-            lineNumsContainer.innerHTML += '<span class="line-number"></span>\n';
+            lineNumsContainer.innerHTML += '<span class="qpresent-line-number"></span>\n';
         }
         lineNums.appendChild(lineNumsContainer);
-        codeElem.classList.add('code-container');
+        codeElem.classList.add('qpresent-code-container');
         codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code).value + '</code></pre>';
         tr.appendChild(lineNums);
         tr.appendChild(codeElem);
         table.appendChild(tr);
-        table.classList.add('code-table');
+        table.classList.add('qpresent-code-table');
         return table.outerHTML;
     };
     marked.setOptions({
