@@ -72,7 +72,7 @@ module QPresent {
     }
 
     function makePageContent(content: string, colDelim?: RegExp): string {
-        let c = content.replace(/([^\\])~/g, '$1&#x2006;').replace(/\\~/g, '~');
+        let c = content.replace(/\\\r?\n\s*/g, '').replace(/([^\\])~/g, '$1&#x2006;').replace(/\\~/g, '~');
 
         if (!colDelim)
             return marked(c);

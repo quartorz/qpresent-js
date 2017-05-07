@@ -46,7 +46,7 @@ var QPresent;
         };
     }
     function makePageContent(content, colDelim) {
-        var c = content.replace(/([^\\])~/g, '$1&#x2006;').replace(/\\~/g, '~');
+        var c = content.replace(/\\\r?\n\s*/g, '').replace(/([^\\])~/g, '$1&#x2006;').replace(/\\~/g, '~');
         if (!colDelim)
             return marked(c);
         colDelim.lastIndex = 0;
