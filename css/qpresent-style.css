@@ -54,6 +54,46 @@ span.qpresent-line-number:before {
 
 .block {
     margin-bottom: 3mm;
+    border-radius: 15px;
+    box-shadow: rgba(128, 128, 128, 0.5) 3px 3px 7px;
+}
+
+.block-title {
+    padding: 5px 10px;
+    border-radius: 15px 15px 0 0;
+    color: white;
+}
+
+.block-content {
+    color: black;
+    padding: 1px 10px 1px 10px;
+    border-radius: 0 0 15px 15px;
+}
+
+.block[block-type="default"] .block-title,
+.block[block-type="definition"] .block-title {
+    background-color: rgb(140, 140, 255);
+}
+
+.block[block-type="default"] .block-content,
+.block[block-type="definition"] .block-content {
+    background-color: rgb(240, 240, 255);
+}
+
+.block[block-type="alert"] .block-title {
+    background-color: rgb(255, 100, 100);
+}
+
+.block[block-type="alert"] .block-content {
+    background-color: rgb(255, 235, 235);
+}
+
+.block[block-type="example"] .block-title {
+    background-color: rgb(100, 255, 100);
+}
+
+.block[block-type="example"] .block-content {
+    background-color: rgb(230, 255, 230);
 }
 
 .qpresent-page, .qpresent-page-inner-container {

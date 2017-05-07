@@ -2,7 +2,6 @@
 /// <reference path="highlight.js/index.d.ts" />
 /// <reference path="katex/index.d.ts" />
 /// <reference path="katex-auto-render.d.ts" />
-/// <reference path="block.ts" />
 
 interface Document {
     mozCancelFullScreen: () => void;
@@ -322,7 +321,10 @@ module QPresent {
                     ignoredTags: []
                 });
 
-                makeBlock(page.pageElem, c => marked(c));
+                Array.prototype.forEach.call(page.pageElem.getElementsByClassName('block-content'), e => {
+                    e.innerHTML = marked(e.innerHTML);
+                });
+
                 addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
 
                 this.element.appendChild(page.outerContainerElem);

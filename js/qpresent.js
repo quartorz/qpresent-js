@@ -2,7 +2,6 @@
 /// <reference path="highlight.js/index.d.ts" />
 /// <reference path="katex/index.d.ts" />
 /// <reference path="katex-auto-render.d.ts" />
-/// <reference path="block.ts" />
 var QPresent;
 (function (QPresent) {
     'use strict';
@@ -240,7 +239,9 @@ var QPresent;
                     delimiters: options.mathDelimiter,
                     ignoredTags: []
                 });
-                makeBlock(page.pageElem, function (c) { return marked(c); });
+                Array.prototype.forEach.call(page.pageElem.getElementsByClassName('block-content'), function (e) {
+                    e.innerHTML = marked(e.innerHTML);
+                });
                 addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
                 _this.element.appendChild(page.outerContainerElem);
                 _this.pages.push(page);
