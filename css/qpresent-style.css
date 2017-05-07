@@ -35,12 +35,21 @@ pre, code.hljs, span.qpresent-line-number {
     padding: 0;
 }
 
+.qpresent-line-number-container {
+    margin-right: 3mm;
+}
+
 code.hljs {
     overflow: visible;
 }
 
 .qpresent-code-container {
     width: 100%;
+}
+
+span.qpresent-line-number:before {
+  content: counter(line, decimal-leading-zero);
+  color: gray;
 }
 
 .block {

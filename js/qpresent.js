@@ -12,6 +12,7 @@ var QPresent;
         QPresentOption["default"] = function () {
             return {
                 pageDelimiter: '^------$',
+                columnDelimiter: '^\\*\\*\\*$',
                 pageWidth: 1122,
                 pageHeight: 792,
                 mathDelimiter: [
@@ -44,8 +45,46 @@ var QPresent;
             pageContentElem: pageContentElem
         };
     }
-    function makePageContent(content) {
-        return marked(content.replace(/([^\\])~/g, '$1&#x2006;'));
+    function makePageContent(content, colDelim) {
+        var c = content.replace(/([^\\])~/g, '$1&#x2006;').replace(/\\~/g, '~');
+        if (!colDelim)
+            return marked(c);
+        colDelim.lastIndex = 0;
+        content = '';
+        var lastIndex = 0;
+        var e;
+        var headRange = [0, 0];
+        var leftRange = [0, 0];
+        var rightRange = [0, 0];
+        for (;;) {
+            lastIndex = colDelim.lastIndex;
+            headRange[0] = colDelim.lastIndex;
+            if (!(e = colDelim.exec(c)))
+                break;
+            headRange[1] = e.index;
+            leftRange[0] = colDelim.lastIndex;
+            if (!(e = colDelim.exec(c)))
+                break;
+            leftRange[1] = e.index;
+            rightRange[0] = colDelim.lastIndex;
+            if (!(e = colDelim.exec(c)))
+                break;
+            rightRange[1] = e.index;
+            content += marked(c.substring(headRange[0], headRange[1]));
+            var container = document.createElement('div');
+            var left = document.createElement('div');
+            var right = document.createElement('div');
+            container.classList.add('qpresent-twocol-container');
+            left.classList.add('qpresent-twocol-left');
+            right.classList.add('qpresent-twocol-right');
+            left.innerHTML = marked(c.substring(leftRange[0], leftRange[1]));
+            right.innerHTML = marked(c.substring(rightRange[0], rightRange[1]));
+            container.appendChild(left);
+            container.appendChild(right);
+            content += container.outerHTML;
+        }
+        content += marked((lastIndex == 0) ? c : c.substr(lastIndex));
+        return content;
     }
     function makePageNumber(index, totalNum) {
         var pageNum = document.createElement('span');
@@ -171,11 +210,12 @@ var QPresent;
             this.pages = [];
             this.pageSize = [options.pageWidth, options.pageHeight];
             var pageDelim = new RegExp(options.pageDelimiter, 'm');
+            var colDelim = new RegExp(options.columnDelimiter, 'mg');
             var pages = content.split(pageDelim);
             pages.forEach(function (pageContent, index) {
                 var page = newPage();
                 page.outerContainerElem.id = 'qpresent-page-' + index;
-                page.pageContentElem.innerHTML = makePageContent(pageContent);
+                page.pageContentElem.innerHTML = makePageContent(pageContent, colDelim);
                 page.pageElem.appendChild(makePageNumber(index + 1, pages.length));
                 page.pageElem.style.width = options.pageWidth + "px";
                 page.pageElem.style.height = options.pageHeight + "px";

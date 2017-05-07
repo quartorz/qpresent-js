@@ -2,6 +2,41 @@
     margin: 0;
 }
 
+pre.qpresent-line-numbers{
+    width: auto;
+}
+
+span.qpresent-line-number:first-child {
+    counter-increment: line 0;
+}
+
+span.qpresent-line-number {
+    counter-increment: line;
+}
+
+table.qpresent-code-table.qpresent-keep-line-number {
+    counter-increment: line;
+}
+
+table.qpresent-code-table:not(.qpresent-keep-line-number) {
+    counter-reset: line 1;
+}
+
+.qpresent-twocol-container {
+    display: table;
+    width: 100%;
+}
+
+.qpresent-twocol-left,
+.qpresent-twocol-right {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 50%;
+    float: left;
+    padding: 0 0.5em;
+}
+
 html,
 .qpresent-page-outer-container {
     overflow: hidden;

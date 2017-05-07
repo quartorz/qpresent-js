@@ -18,6 +18,7 @@ module QPresent {
 
     class QPresentOption {
         pageDelimiter?: string;
+        columnDelimiter?: string;
         pageWidth?: number;
         pageHeight?: number;
         mathDelimiter?: AutoRenderDelimiter[];
@@ -25,6 +26,7 @@ module QPresent {
         static default(): QPresentOption {
             return {
                 pageDelimiter: '^------$',
+                columnDelimiter: '^\\*\\*\\*$',
                 pageWidth: 1122,    // 297mm
                 pageHeight: 792,    // 210mm
                 mathDelimiter: [
@@ -69,8 +71,58 @@ module QPresent {
         };
     }
 
-    function makePageContent(content: string): string {
-        return marked(content.replace(/([^\\])~/g, '$1&#x2006;'));
+    function makePageContent(content: string, colDelim?: RegExp): string {
+        let c = content.replace(/([^\\])~/g, '$1&#x2006;').replace(/\\~/g, '~');
+
+        if (!colDelim)
+            return marked(c);
+
+        colDelim.lastIndex = 0;
+        content = '';
+
+        let lastIndex: number = 0;
+        let e: RegExpExecArray;
+        let headRange: [number, number] = [0, 0];
+        let leftRange: [number, number] = [0, 0];
+        let rightRange: [number, number] = [0, 0];
+
+        for (;;) {
+            lastIndex = colDelim.lastIndex;
+            headRange[0] = colDelim.lastIndex;
+            if (!(e = colDelim.exec(c)))
+                break;
+            headRange[1] = e.index;
+            leftRange[0] = colDelim.lastIndex;
+            if (!(e = colDelim.exec(c)))
+                break
+            leftRange[1] = e.index;
+            rightRange[0] = colDelim.lastIndex;
+            if (!(e = colDelim.exec(c)))
+                break;
+            rightRange[1] = e.index;
+
+            content += marked(c.substring(headRange[0], headRange[1]));
+
+            let container = document.createElement('div');
+            let left = document.createElement('div');
+            let right = document.createElement('div');
+
+            container.classList.add('qpresent-twocol-container');
+            left.classList.add('qpresent-twocol-left');
+            right.classList.add('qpresent-twocol-right');
+
+            left.innerHTML = marked(c.substring(leftRange[0], leftRange[1]));
+            right.innerHTML = marked(c.substring(rightRange[0], rightRange[1]));
+
+            container.appendChild(left);
+            container.appendChild(right);
+
+            content += container.outerHTML;
+        }
+
+        content += marked((lastIndex == 0) ? c : c.substr(lastIndex));
+
+        return content;
     }
 
     function makePageNumber(index: number, totalNum: number): HTMLElement {
@@ -234,12 +286,13 @@ module QPresent {
             this.pageSize = [options.pageWidth, options.pageHeight];
 
             let pageDelim = new RegExp(options.pageDelimiter, 'm');
+            let colDelim = new RegExp(options.columnDelimiter, 'mg');
             let pages = content.split(pageDelim);
             pages.forEach((pageContent, index) => {
                 let page = newPage();
 
                 page.outerContainerElem.id = 'qpresent-page-' + index;
-                page.pageContentElem.innerHTML = makePageContent(pageContent);
+                page.pageContentElem.innerHTML = makePageContent(pageContent, colDelim);
                 page.pageElem.appendChild(makePageNumber(index+1, pages.length));
                 page.pageElem.style.width = `${options.pageWidth}px`;
                 page.pageElem.style.height = `${options.pageHeight}px`;
