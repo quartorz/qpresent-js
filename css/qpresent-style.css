@@ -70,13 +70,13 @@ span.qpresent-line-number:before {
     border-radius: 0 0 15px 15px;
 }
 
-.block[block-type="default"] .block-title,
+.block .block-title,
 .block[block-type="definition"] .block-title {
     background-color: rgb(140, 140, 255);
 }
 
-.block[block-type="default"] .block-content,
-.block[block-type="definition"] .block-content {
+.block .block-body,
+.block[block-type="definition"] .block-body {
     background-color: rgb(240, 240, 255);
 }
 
@@ -84,7 +84,7 @@ span.qpresent-line-number:before {
     background-color: rgb(255, 100, 100);
 }
 
-.block[block-type="alert"] .block-content {
+.block[block-type="alert"] .block-body {
     background-color: rgb(255, 235, 235);
 }
 
@@ -92,7 +92,7 @@ span.qpresent-line-number:before {
     background-color: rgb(100, 255, 100);
 }
 
-.block[block-type="example"] .block-content {
+.block[block-type="example"] .block-body {
     background-color: rgb(230, 255, 230);
 }
 
