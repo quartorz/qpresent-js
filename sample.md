@@ -41,54 +41,45 @@
 
 # 2~段組み
 
-***
+----
 
 - 左
 
-***
+----
 
 - 右
 
-***
+----
 
 ------
 
 # beamer~の~block~みたいなやつ
 
-<p>
-<div class="block" block-type="default">
-  <div class="block-title">タイトル</div>
-  <div class="block-content">
-  * 内容
-  </div>
-</div>
-</p>
+***
+タイトル
+***
+* 内容
+***
 
-<p>
-<div class="block" block-type="alert">
-  <div class="block-title">タイトル</div>
-  <div class="block-content">
-  * 内容
-  </div>
-</div>
-</p>
+***
+タイトル
+***
+* 内容
+***
+<!-- .element: block-type="alert" -->
 
-<p>
-<div class="block" block-type="example">
-  <div class="block-title">タイトル</div>
-  <div class="block-content">
-  * 内容
-  </div>
-</div>
-</p>
+***
+タイトル
+***
+* 内容
+***
+<!-- .element: block-type="example" -->
 
-<p>
-<div class="block" block-type="example">
-  <div class="block-content">
-  * タイトルなし
-  </div>
-</div>
-</p>
+***
+***
+* タイトルなし
+***
+<!-- .element: block-type="example" -->
 
 ------
 
@@ -104,15 +95,13 @@ display:
 
 # ブロックと数式
 
-<p>
-<div class="block" block-type="example">
-  <div class="block-title">例</div>
-  <div class="block-content">
-  - inline: $f(x)$
-  - display: $$f(x)$$
-  </div>
-</div>
-</p>
+***
+例
+***
+- inline: $f(x)$
+- display: $$f(x)$$
+***
+<!-- .element: block-type="example" -->
 
 ------
 
