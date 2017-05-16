@@ -244,7 +244,7 @@ module QPresent {
                 let dest: HTMLElement;
 
                 if (!prevNode || prevNode.nodeType != Node.ELEMENT_NODE) {
-                    /*if (prevNode.nodeType == Node.TEXT_NODE && prevNode.textContent.trim().length == 0) {
+                    if (prevNode.nodeType == Node.TEXT_NODE && /(?:\r?\n)+/.test(prevNode.textContent)) {
                         if (prevNode.previousSibling
                             && prevNode.previousSibling.nodeType == Node.ELEMENT_NODE
                         ) {
@@ -254,8 +254,7 @@ module QPresent {
                         }
                     } else {
                         dest = node.parentElement;
-                    }*/
-                    dest = node.parentElement;
+                    }
                 } else {
                     dest = prevNode as HTMLElement;
                 }

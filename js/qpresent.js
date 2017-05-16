@@ -174,18 +174,18 @@ var QPresent;
             if (matched) {
                 var dest = void 0;
                 if (!prevNode || prevNode.nodeType != Node.ELEMENT_NODE) {
-                    /*if (prevNode.nodeType == Node.TEXT_NODE && prevNode.textContent.trim().length == 0) {
+                    if (prevNode.nodeType == Node.TEXT_NODE && /(?:\r?\n)+/.test(prevNode.textContent)) {
                         if (prevNode.previousSibling
-                            && prevNode.previousSibling.nodeType == Node.ELEMENT_NODE
-                        ) {
-                            dest = prevNode.previousSibling as HTMLElement;
-                        } else {
+                            && prevNode.previousSibling.nodeType == Node.ELEMENT_NODE) {
+                            dest = prevNode.previousSibling;
+                        }
+                        else {
                             dest = node.parentElement;
                         }
-                    } else {
+                    }
+                    else {
                         dest = node.parentElement;
-                    }*/
-                    dest = node.parentElement;
+                    }
                 }
                 else {
                     dest = prevNode;
