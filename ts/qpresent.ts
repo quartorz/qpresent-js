@@ -270,7 +270,12 @@ module QPresent {
         let next = node.nextSibling;
 
         while (next !== null) {
-            if (next.nodeType != Node.TEXT_NODE)
+            if (next.nodeType != Node.TEXT_NODE
+                && !(
+                    next.nodeType == Node.ELEMENT_NODE
+                    && (next as HTMLElement).classList.contains('qpresent-space')
+                )
+            )
                 addAttributes(topmostElem, next, node);
             node = next;
             next = next.nextSibling;
@@ -302,7 +307,7 @@ module QPresent {
         lineNums.appendChild(lineNumsContainer);
 
         codeElem.classList.add('qpresent-code-container');
-        codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code).value + '</code></pre>';
+        codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code, [language]).value + '</code></pre>';
 
         tr.appendChild(lineNums);
         tr.appendChild(codeElem);
@@ -345,16 +350,12 @@ module QPresent {
                 page.pageElem.style.width = `${options.pageWidth}px`;
                 page.pageElem.style.height = `${options.pageHeight}px`;
 
+                addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
+
                 renderMathInElement(page.pageElem, {
                     delimiters: options.mathDelimiter,
                     ignoredTags: []
                 });
-
-                Array.prototype.forEach.call(page.pageElem.getElementsByClassName('block-content'), e => {
-                    e.innerHTML = marked(e.innerHTML);
-                });
-
-                addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
 
                 this.element.appendChild(page.outerContainerElem);
                 this.pages.push(page);

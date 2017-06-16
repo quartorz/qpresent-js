@@ -198,7 +198,9 @@ var QPresent;
         }
         var next = node.nextSibling;
         while (next !== null) {
-            if (next.nodeType != Node.TEXT_NODE)
+            if (next.nodeType != Node.TEXT_NODE
+                && !(next.nodeType == Node.ELEMENT_NODE
+                    && next.classList.contains('qpresent-space')))
                 addAttributes(topmostElem, next, node);
             node = next;
             next = next.nextSibling;
@@ -225,7 +227,7 @@ var QPresent;
         }
         lineNums.appendChild(lineNumsContainer);
         codeElem.classList.add('qpresent-code-container');
-        codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code).value + '</code></pre>';
+        codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code, [language]).value + '</code></pre>';
         tr.appendChild(lineNums);
         tr.appendChild(codeElem);
         table.appendChild(tr);
@@ -254,14 +256,11 @@ var QPresent;
                 page.pageElem.appendChild(makePageNumber(index + 1, pages.length));
                 page.pageElem.style.width = options.pageWidth + "px";
                 page.pageElem.style.height = options.pageHeight + "px";
+                addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
                 renderMathInElement(page.pageElem, {
                     delimiters: options.mathDelimiter,
                     ignoredTags: []
                 });
-                Array.prototype.forEach.call(page.pageElem.getElementsByClassName('block-content'), function (e) {
-                    e.innerHTML = marked(e.innerHTML);
-                });
-                addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
                 _this.element.appendChild(page.outerContainerElem);
                 _this.pages.push(page);
             });
