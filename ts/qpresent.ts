@@ -481,6 +481,7 @@ module QPresent {
 
             this.pages[pageIndex].pageElem.style.transform = `scale(${r}, ${r})`;
             this.pages[pageIndex].pageContentElem.style.minHeight = `${this.pageSize[1]}px`;
+            this.pages[pageIndex].pageContentElem.style.maxHeight = `${this.pageSize[1]}px`;
             this.pages[pageIndex].innerContainerElem.style.width = `${w}px`;
             this.pages[pageIndex].innerContainerElem.style.height = `${h}px`;
             this.pages[pageIndex].outerContainerElem.style.width = `${w}px`;
