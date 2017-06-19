@@ -42,6 +42,10 @@ html,
     overflow: hidden;
 }
 
+.qpresent-page-content {
+    box-sizing: border-box;
+}
+
 .qpresent-page-content.qpresent-title {
     display: table-cell;
     vertical-align: middle;
