@@ -115,9 +115,12 @@ span.qpresent-line-number:before {
 }
 
 .qpresent-page-number-separator {
-    margin: 0 1mm;
+    margin: 0 1mm 0 0;
 }
 
+.qpresent-page-number-current {
+    padding: 3mm 1mm 0 3mm;
+}
 
 .qpresent-navigation-button-container {
     position: absolute;

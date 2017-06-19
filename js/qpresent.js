@@ -108,12 +108,35 @@ var QPresent;
         currentNumElem.classList.add('qpresent-page-number-current');
         separatorElem.classList.add('qpresent-page-number-separator');
         totalNumElem.classList.add('qpresent-page-number-total');
+        currentNumElem.setAttribute('contenteditable', 'true');
         currentNumElem.innerText = index.toString();
         separatorElem.innerText = '/';
         totalNumElem.innerText = totalNum.toString();
         pageNum.appendChild(currentNumElem);
         pageNum.appendChild(separatorElem);
         pageNum.appendChild(totalNumElem);
+        var onConfirm = function () {
+            var n = parseInt(currentNumElem.innerText);
+            currentNumElem.innerText = index.toString();
+            if (isFinite(n)) {
+                manager.jumpTo(Math.max(0, Math.min(totalNum - 1, n - 1)));
+            }
+        };
+        currentNumElem.addEventListener('focus', function (e) {
+            setTimeout(function () { return currentNumElem.innerText = ''; }, 0);
+        });
+        currentNumElem.addEventListener('keydown', function (e) {
+            if (e.keyCode == 0x0d) {
+                onConfirm();
+                e.preventDefault();
+                return false;
+            }
+        });
+        currentNumElem.addEventListener('blur', function (e) {
+            if (currentNumElem.offsetParent !== null) {
+                onConfirm();
+            }
+        });
         return pageNum;
     }
     function makeNavigationButtons() {
