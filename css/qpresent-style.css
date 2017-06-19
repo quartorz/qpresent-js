@@ -100,8 +100,12 @@ span.qpresent-line-number:before {
     background: white !important;
 }
 
-.qpresent-page {
+.qpresent-page-content {
     padding: 5mm;
+}
+
+.qpresent-page-content:focus {
+    outline: none;
 }
 
 .qpresent-page-number {

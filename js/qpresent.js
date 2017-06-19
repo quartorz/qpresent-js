@@ -35,6 +35,7 @@ var QPresent;
         pageInnerContElem.classList.add('qpresent-page-inner-container');
         pageElem.classList.add('qpresent-page');
         pageContentElem.classList.add('qpresent-page-content');
+        pageContentElem.setAttribute('tabindex', '0');
         pageOuterContElem.appendChild(pageInnerContElem);
         pageInnerContElem.appendChild(pageElem);
         pageElem.appendChild(pageContentElem);
@@ -45,62 +46,57 @@ var QPresent;
             pageContentElem: pageContentElem
         };
     }
+    function makeColumn(content, colDelim) {
+        var result = '';
+        colDelim.lastIndex = 0;
+        var e;
+        var lastIndex;
+        for (;;) {
+            lastIndex = colDelim.lastIndex;
+            if (!(e = colDelim.exec(content)))
+                break;
+            result += marked(e[1]);
+            var container = document.createElement('div');
+            var left = document.createElement('div');
+            var right = document.createElement('div');
+            container.classList.add('qpresent-twocol-container');
+            left.classList.add('qpresent-twocol-left');
+            right.classList.add('qpresent-twocol-right');
+            left.innerHTML = marked(e[2]);
+            right.innerHTML = marked(e[3]);
+            container.appendChild(left);
+            container.appendChild(right);
+            result += container.outerHTML;
+        }
+        result += marked((lastIndex == 0) ? content : content.substr(lastIndex));
+        return result;
+    }
     function makePageContent(content, colDelim, blockDelim) {
         var c = content.replace(/\\\r?\n\s*/g, '').replace(/([^\\])~/g, '$1<span class="qpresent-space">&nbsp;</span>').replace(/\\~/g, '~');
-        if (blockDelim) {
-            var e = void 0;
-            var lastIndex = void 0;
-            content = '';
-            blockDelim.lastIndex = 0;
-            for (;;) {
-                lastIndex = blockDelim.lastIndex;
-                if (!(e = blockDelim.exec(c)))
-                    break;
-                content += e[1];
-                var blockElem = document.createElement('div');
-                var bodyElem = document.createElement('div');
-                blockElem.classList.add('block');
-                bodyElem.classList.add('block-body');
-                if (e[2].trim().length != 0) {
-                    var titleElem = document.createElement('div');
-                    titleElem.classList.add('block-title');
-                    titleElem.innerHTML = e[2];
-                    blockElem.appendChild(titleElem);
-                }
-                bodyElem.innerHTML = marked(e[3]);
-                blockElem.appendChild(bodyElem);
-                content += blockElem.outerHTML;
+        var e;
+        var lastIndex;
+        content = '';
+        blockDelim.lastIndex = 0;
+        for (;;) {
+            lastIndex = blockDelim.lastIndex;
+            if (!(e = blockDelim.exec(c)))
+                break;
+            content += makeColumn(e[1], colDelim);
+            var blockElem = document.createElement('div');
+            var bodyElem = document.createElement('div');
+            blockElem.classList.add('block');
+            bodyElem.classList.add('block-body');
+            if (e[2].trim().length != 0) {
+                var titleElem = document.createElement('div');
+                titleElem.classList.add('block-title');
+                titleElem.innerHTML = e[2];
+                blockElem.appendChild(titleElem);
             }
-            content += (lastIndex == 0) ? c : c.substr(lastIndex);
-            c = content;
+            bodyElem.innerHTML = marked(e[3]);
+            blockElem.appendChild(bodyElem);
+            content += blockElem.outerHTML;
         }
-        if (colDelim) {
-            content = '';
-            colDelim.lastIndex = 0;
-            var e = void 0;
-            var lastIndex = void 0;
-            for (;;) {
-                lastIndex = colDelim.lastIndex;
-                if (!(e = colDelim.exec(c)))
-                    break;
-                content += marked(e[1]);
-                var container = document.createElement('div');
-                var left = document.createElement('div');
-                var right = document.createElement('div');
-                container.classList.add('qpresent-twocol-container');
-                left.classList.add('qpresent-twocol-left');
-                right.classList.add('qpresent-twocol-right');
-                left.innerHTML = marked(e[2]);
-                right.innerHTML = marked(e[3]);
-                container.appendChild(left);
-                container.appendChild(right);
-                content += container.outerHTML;
-            }
-            content += marked((lastIndex == 0) ? c : c.substr(lastIndex));
-        }
-        else {
-            content = marked(c);
-        }
+        content += makeColumn((lastIndex == 0) ? c : c.substr(lastIndex), colDelim);
         return content;
     }
     function makePageNumber(index, totalNum) {
@@ -198,7 +194,9 @@ var QPresent;
         }
         var next = node.nextSibling;
         while (next !== null) {
-            if (next.nodeType != Node.TEXT_NODE)
+            if (next.nodeType != Node.TEXT_NODE
+                && !(next.nodeType == Node.ELEMENT_NODE
+                    && next.classList.contains('qpresent-space')))
                 addAttributes(topmostElem, next, node);
             node = next;
             next = next.nextSibling;
@@ -225,7 +223,7 @@ var QPresent;
         }
         lineNums.appendChild(lineNumsContainer);
         codeElem.classList.add('qpresent-code-container');
-        codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code).value + '</code></pre>';
+        codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code, [language]).value + '</code></pre>';
         tr.appendChild(lineNums);
         tr.appendChild(codeElem);
         table.appendChild(tr);
@@ -254,14 +252,11 @@ var QPresent;
                 page.pageElem.appendChild(makePageNumber(index + 1, pages.length));
                 page.pageElem.style.width = options.pageWidth + "px";
                 page.pageElem.style.height = options.pageHeight + "px";
+                addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
                 renderMathInElement(page.pageElem, {
                     delimiters: options.mathDelimiter,
                     ignoredTags: []
                 });
-                Array.prototype.forEach.call(page.pageElem.getElementsByClassName('block-content'), function (e) {
-                    e.innerHTML = marked(e.innerHTML);
-                });
-                addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
                 _this.element.appendChild(page.outerContainerElem);
                 _this.pages.push(page);
             });
@@ -291,6 +286,7 @@ var QPresent;
             this.pages[pageIndex].outerContainerElem.style.display = 'block';
             this.currentPage = pageIndex;
             this.resizeCurrentPage();
+            this.pages[pageIndex].pageContentElem.focus();
         };
         Manager.prototype.nextPage = function () {
             if (this.currentPage + 1 < this.pages.length) {
@@ -338,6 +334,7 @@ var QPresent;
             var w = this.pageSize[0] * r;
             var h = this.pageSize[1] * r;
             this.pages[pageIndex].pageElem.style.transform = "scale(" + r + ", " + r + ")";
+            this.pages[pageIndex].pageContentElem.style.minHeight = this.pageSize[1] + "px";
             this.pages[pageIndex].innerContainerElem.style.width = w + "px";
             this.pages[pageIndex].innerContainerElem.style.height = h + "px";
             this.pages[pageIndex].outerContainerElem.style.width = w + "px";

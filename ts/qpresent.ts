@@ -60,6 +60,8 @@ module QPresent {
         pageElem.classList.add('qpresent-page');
         pageContentElem.classList.add('qpresent-page-content');
 
+        pageContentElem.setAttribute('tabindex', '0');
+
         pageOuterContElem.appendChild(pageInnerContElem);
         pageInnerContElem.appendChild(pageElem);
         pageElem.appendChild(pageContentElem);
@@ -72,84 +74,82 @@ module QPresent {
         };
     }
 
-    function makePageContent(content: string, colDelim?: RegExp, blockDelim?: RegExp): string {
+    function makeColumn(content: string, colDelim: RegExp) {
+        let result = '';
+
+        colDelim.lastIndex = 0;
+
+        let e: RegExpExecArray;
+        let lastIndex: number;
+
+        for (;;) {
+            lastIndex = colDelim.lastIndex;
+
+            if (!(e = colDelim.exec(content)))
+                break;
+
+            result += marked(e[1]);
+
+            let container = document.createElement('div');
+            let left = document.createElement('div');
+            let right = document.createElement('div');
+
+            container.classList.add('qpresent-twocol-container');
+            left.classList.add('qpresent-twocol-left');
+            right.classList.add('qpresent-twocol-right');
+
+            left.innerHTML = marked(e[2]);
+            right.innerHTML = marked(e[3]);
+
+            container.appendChild(left);
+            container.appendChild(right);
+
+            result += container.outerHTML;
+        }
+
+        result += marked((lastIndex == 0) ? content : content.substr(lastIndex));
+
+        return result;
+    }
+
+    function makePageContent(content: string, colDelim: RegExp, blockDelim: RegExp): string {
         let c = content.replace(/\\\r?\n\s*/g, '').replace(/([^\\])~/g, '$1<span class="qpresent-space">&nbsp;</span>').replace(/\\~/g, '~');
 
-        if (blockDelim) {
-            let e: RegExpExecArray;
-            let lastIndex: number;
+        let e: RegExpExecArray;
+        let lastIndex: number;
 
-            content = '';
-            blockDelim.lastIndex = 0;
+        content = '';
+        blockDelim.lastIndex = 0;
 
-            for (;;) {
-                lastIndex = blockDelim.lastIndex;
+        for (;;) {
+            lastIndex = blockDelim.lastIndex;
 
-                if (!(e = blockDelim.exec(c)))
-                    break;
+            if (!(e = blockDelim.exec(c)))
+                break;
 
-                content += e[1];
+            content += makeColumn(e[1], colDelim);
 
-                let blockElem = document.createElement('div');
-                let bodyElem = document.createElement('div');
+            let blockElem = document.createElement('div');
+            let bodyElem = document.createElement('div');
 
-                blockElem.classList.add('block');
-                bodyElem.classList.add('block-body');
+            blockElem.classList.add('block');
+            bodyElem.classList.add('block-body');
 
-                if (e[2].trim().length != 0) {
-                    let titleElem = document.createElement('div');
-                    titleElem.classList.add('block-title');
-                    titleElem.innerHTML = e[2];
-                    blockElem.appendChild(titleElem);
-                }
-
-                bodyElem.innerHTML = marked(e[3]);
-                blockElem.appendChild(bodyElem);
-
-                content += blockElem.outerHTML;
+            if (e[2].trim().length != 0) {
+                let titleElem = document.createElement('div');
+                titleElem.classList.add('block-title');
+                titleElem.innerHTML = e[2];
+                blockElem.appendChild(titleElem);
             }
 
-            content += (lastIndex == 0) ? c : c.substr(lastIndex);
-            c = content;
+            bodyElem.innerHTML = marked(e[3]);
+            blockElem.appendChild(bodyElem);
+
+            content += blockElem.outerHTML;
         }
 
-        if (colDelim) {
-            content = '';
-            colDelim.lastIndex = 0;
-
-            let e: RegExpExecArray;
-            let lastIndex: number;
-
-            for (;;) {
-                lastIndex = colDelim.lastIndex;
-
-                if (!(e = colDelim.exec(c)))
-                    break;
-
-                content += marked(e[1]);
-
-                let container = document.createElement('div');
-                let left = document.createElement('div');
-                let right = document.createElement('div');
-
-                container.classList.add('qpresent-twocol-container');
-                left.classList.add('qpresent-twocol-left');
-                right.classList.add('qpresent-twocol-right');
-
-                left.innerHTML = marked(e[2]);
-                right.innerHTML = marked(e[3]);
-
-                container.appendChild(left);
-                container.appendChild(right);
-
-                content += container.outerHTML;
-            }
-
-            content += marked((lastIndex == 0) ? c : c.substr(lastIndex));
-        } else {
-            content = marked(c);
-        }
-
+        content += makeColumn((lastIndex == 0) ? c : c.substr(lastIndex), colDelim);
+        
         return content;
     }
 
@@ -270,7 +270,12 @@ module QPresent {
         let next = node.nextSibling;
 
         while (next !== null) {
-            if (next.nodeType != Node.TEXT_NODE)
+            if (next.nodeType != Node.TEXT_NODE
+                && !(
+                    next.nodeType == Node.ELEMENT_NODE
+                    && (next as HTMLElement).classList.contains('qpresent-space')
+                )
+            )
                 addAttributes(topmostElem, next, node);
             node = next;
             next = next.nextSibling;
@@ -302,7 +307,7 @@ module QPresent {
         lineNums.appendChild(lineNumsContainer);
 
         codeElem.classList.add('qpresent-code-container');
-        codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code).value + '</code></pre>';
+        codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code, [language]).value + '</code></pre>';
 
         tr.appendChild(lineNums);
         tr.appendChild(codeElem);
@@ -345,16 +350,12 @@ module QPresent {
                 page.pageElem.style.width = `${options.pageWidth}px`;
                 page.pageElem.style.height = `${options.pageHeight}px`;
 
+                addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
+
                 renderMathInElement(page.pageElem, {
                     delimiters: options.mathDelimiter,
                     ignoredTags: []
                 });
-
-                Array.prototype.forEach.call(page.pageElem.getElementsByClassName('block-content'), e => {
-                    e.innerHTML = marked(e.innerHTML);
-                });
-
-                addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
 
                 this.element.appendChild(page.outerContainerElem);
                 this.pages.push(page);
@@ -392,6 +393,8 @@ module QPresent {
             this.pages[pageIndex].outerContainerElem.style.display = 'block';
             this.currentPage = pageIndex;
             this.resizeCurrentPage();
+
+            this.pages[pageIndex].pageContentElem.focus();
         }
 
         nextPage() {
@@ -449,6 +452,7 @@ module QPresent {
             let h = this.pageSize[1] * r;
 
             this.pages[pageIndex].pageElem.style.transform = `scale(${r}, ${r})`;
+            this.pages[pageIndex].pageContentElem.style.minHeight = `${this.pageSize[1]}px`;
             this.pages[pageIndex].innerContainerElem.style.width = `${w}px`;
             this.pages[pageIndex].innerContainerElem.style.height = `${h}px`;
             this.pages[pageIndex].outerContainerElem.style.width = `${w}px`;
