@@ -99,7 +99,7 @@ var QPresent;
         content += makeColumn((lastIndex == 0) ? c : c.substr(lastIndex), colDelim);
         return content;
     }
-    function makePageNumber(index, totalNum) {
+    function makePageNumber(manager, index, totalNum) {
         var pageNum = document.createElement('span');
         var currentNumElem = document.createElement('span');
         var separatorElem = document.createElement('span');
@@ -127,7 +127,13 @@ var QPresent;
         });
         currentNumElem.addEventListener('keydown', function (e) {
             if (e.keyCode == 0x0d) {
-                onConfirm();
+                var n = parseInt(currentNumElem.innerText);
+                if (isFinite(n)) {
+                    onConfirm();
+                }
+                else {
+                    currentNumElem.innerHTML = '';
+                }
                 e.preventDefault();
                 return false;
             }
@@ -148,6 +154,8 @@ var QPresent;
         prev.classList.add('qpresent-prev-button', 'qpresent-navigation-button');
         buttonSep.classList.add('qpresent-navigation-button-separator');
         next.classList.add('qpresent-next-button', 'qpresent-navigation-button');
+        prev.setAttribute('tabindex', '-1');
+        next.setAttribute('tabindex', '-1');
         prev.type = 'button';
         next.type = 'button';
         container.appendChild(prev);
@@ -241,9 +249,7 @@ var QPresent;
         var codeElem = document.createElement('td');
         var lineCount = code.split('\n').length;
         lineNumsContainer.classList.add('qpresent-line-number-container');
-        for (var i = 0; i < lineCount; ++i) {
-            lineNumsContainer.innerHTML += '<span class="qpresent-line-number"></span>\n';
-        }
+        lineNumsContainer.innerHTML += '<span class="qpresent-line-number"></span>\n'.repeat(lineCount);
         lineNums.appendChild(lineNumsContainer);
         codeElem.classList.add('qpresent-code-container');
         codeElem.innerHTML = '<pre><code class="hljs">' + hljs.highlightAuto(code, [language]).value + '</code></pre>';
@@ -272,7 +278,7 @@ var QPresent;
                 var page = newPage();
                 page.outerContainerElem.id = 'qpresent-page-' + index;
                 page.pageContentElem.innerHTML = makePageContent(pageContent, colDelim, blockDelim);
-                page.pageElem.appendChild(makePageNumber(index + 1, pages.length));
+                page.pageElem.appendChild(makePageNumber(_this, index + 1, pages.length));
                 page.pageElem.style.width = options.pageWidth + "px";
                 page.pageElem.style.height = options.pageHeight + "px";
                 addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);

@@ -153,7 +153,7 @@ module QPresent {
         return content;
     }
 
-    function makePageNumber(index: number, totalNum: number): HTMLElement {
+    function makePageNumber(manager: Manager, index: number, totalNum: number): HTMLElement {
         let pageNum = document.createElement('span');
         let currentNumElem = document.createElement('span');
         let separatorElem = document.createElement('span');
@@ -188,7 +188,14 @@ module QPresent {
 
         currentNumElem.addEventListener('keydown', (e) => {
             if (e.keyCode == 0x0d) {
-                onConfirm();
+                let n = parseInt(currentNumElem.innerText);
+
+                if (isFinite(n)) {
+                    onConfirm();
+                } else {
+                    currentNumElem.innerHTML = '';
+                }
+
                 e.preventDefault();
                 return false;
             }
@@ -213,6 +220,9 @@ module QPresent {
         prev.classList.add('qpresent-prev-button', 'qpresent-navigation-button');
         buttonSep.classList.add('qpresent-navigation-button-separator');
         next.classList.add('qpresent-next-button', 'qpresent-navigation-button');
+
+        prev.setAttribute('tabindex', '-1');
+        next.setAttribute('tabindex', '-1');
 
         prev.type = 'button';
         next.type = 'button';
@@ -329,9 +339,7 @@ module QPresent {
         let lineCount = code.split('\n').length;
 
         lineNumsContainer.classList.add('qpresent-line-number-container');
-        for(let i = 0; i < lineCount; ++i) {
-            lineNumsContainer.innerHTML += '<span class="qpresent-line-number"></span>\n';
-        }
+        lineNumsContainer.innerHTML += '<span class="qpresent-line-number"></span>\n'.repeat(lineCount);
         lineNums.appendChild(lineNumsContainer);
 
         codeElem.classList.add('qpresent-code-container');
@@ -369,12 +377,13 @@ module QPresent {
             let colDelim = new RegExp(`((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}`, 'mg');
             let blockDelim = new RegExp(`((?:\r|\n|\u2028|\u2029|.)*?)${options.blockDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.blockDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.blockDelimiter}`, 'mg');
             let pages = content.split(pageDelim);
+
             pages.forEach((pageContent, index) => {
                 let page = newPage();
 
                 page.outerContainerElem.id = 'qpresent-page-' + index;
                 page.pageContentElem.innerHTML = makePageContent(pageContent, colDelim, blockDelim);
-                page.pageElem.appendChild(makePageNumber(index+1, pages.length));
+                page.pageElem.appendChild(makePageNumber(this, index+1, pages.length));
                 page.pageElem.style.width = `${options.pageWidth}px`;
                 page.pageElem.style.height = `${options.pageHeight}px`;
 
@@ -474,7 +483,7 @@ module QPresent {
             this.resizeCurrentPage();
         }
 
-        resizePage(pageIndex: number) {
+        private resizePage(pageIndex: number) {
             let r = this.zoomRate;
             let w = this.pageSize[0] * r;
             let h = this.pageSize[1] * r;
@@ -491,7 +500,7 @@ module QPresent {
             this.overlayElem.style.height = `${h}px`;
         }
 
-        resizeCurrentPage() {
+        private resizeCurrentPage() {
             this.resizePage(this.currentPage);
         }
 
