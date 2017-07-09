@@ -22,6 +22,7 @@ module QPresent {
         pageWidth?: number;
         pageHeight?: number;
         mathDelimiter?: AutoRenderDelimiter[];
+        mathAutoEscape?: boolean;
 
         static default(): QPresentOption {
             return {
@@ -36,6 +37,7 @@ module QPresent {
                     { left: '$', right: '$', display: false },
                     { left: '\\(', right: '\\)', display: false },
                 ],
+                mathAutoEscape: false,
             };
         }
     }
@@ -362,7 +364,7 @@ module QPresent {
         pages: Page[];
         currentPage: number;
         pageSize: [number, number];
-        zoomRate: number
+        zoomRate: number;
         overlayElem: HTMLElement;
         buttonContainer: HTMLElement;
 
@@ -380,6 +382,51 @@ module QPresent {
 
             pages.forEach((pageContent, index) => {
                 let page = newPage();
+
+                if (options.mathAutoEscape) {
+                    let indices: number[] = [];
+                    let char = /\\|_|\*/g;
+
+                    options.mathDelimiter.forEach((v) => {
+                        let begin = pageContent.indexOf(v.left);
+
+                        if (begin === -1)
+                            return;
+
+                        let end = pageContent.indexOf(v.right, begin+1);
+                        let e: RegExpExecArray;
+
+                        char.lastIndex = begin;
+
+                        while (end !== -1) {
+                            if (begin + v.left.length === end){
+                                begin = pageContent.indexOf(v.left, end+1);
+                                end = begin === -1 ? -1 : pageContent.indexOf(v.right, begin+1);
+                                continue;
+                            }
+
+                            while (e = char.exec(pageContent)){
+                                if (e.index >= end)
+                                    break;
+                                indices.push(e.index);
+                            }
+
+                            begin = pageContent.indexOf(v.left, end+1);
+                            end = begin === -1 ? -1 : pageContent.indexOf(v.right, begin+1);
+                        }
+                    });
+
+                    let a = 0;
+                    let c: string[] = [];
+
+                    indices.sort().forEach((v) => {
+                        c.push(pageContent.slice(a, v));
+                        a = v;
+                    });
+
+                    c.push(pageContent.slice(a));
+                    pageContent = c.join('\\');
+                }
 
                 page.outerContainerElem.id = 'qpresent-page-' + index;
                 page.pageContentElem.innerHTML = makePageContent(pageContent, colDelim, blockDelim);
@@ -489,6 +536,7 @@ module QPresent {
             let h = this.pageSize[1] * r;
 
             this.pages[pageIndex].pageElem.style.transform = `scale(${r}, ${r})`;
+            this.pages[pageIndex].pageContentElem.style.height = `${this.pageSize[1]}px`;
             this.pages[pageIndex].pageContentElem.style.minHeight = `${this.pageSize[1]}px`;
             this.pages[pageIndex].pageContentElem.style.maxHeight = `${this.pageSize[1]}px`;
             this.pages[pageIndex].innerContainerElem.style.width = `${w}px`;

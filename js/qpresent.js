@@ -20,7 +20,8 @@ var QPresent;
                     { left: '\\[', right: '\\]', display: true },
                     { left: '$', right: '$', display: false },
                     { left: '\\(', right: '\\)', display: false },
-                ]
+                ],
+                mathAutoEscape: false
             };
         };
         return QPresentOption;
@@ -276,6 +277,40 @@ var QPresent;
             var pages = content.split(pageDelim);
             pages.forEach(function (pageContent, index) {
                 var page = newPage();
+                if (options.mathAutoEscape) {
+                    var indices_1 = [];
+                    var char_1 = /\\|_|\*/g;
+                    options.mathDelimiter.forEach(function (v) {
+                        var begin = pageContent.indexOf(v.left);
+                        if (begin === -1)
+                            return;
+                        var end = pageContent.indexOf(v.right, begin + 1);
+                        var e;
+                        char_1.lastIndex = begin;
+                        while (end !== -1) {
+                            if (begin + v.left.length === end) {
+                                begin = pageContent.indexOf(v.left, end + 1);
+                                end = begin === -1 ? -1 : pageContent.indexOf(v.right, begin + 1);
+                                continue;
+                            }
+                            while (e = char_1.exec(pageContent)) {
+                                if (e.index >= end)
+                                    break;
+                                indices_1.push(e.index);
+                            }
+                            begin = pageContent.indexOf(v.left, end + 1);
+                            end = begin === -1 ? -1 : pageContent.indexOf(v.right, begin + 1);
+                        }
+                    });
+                    var a_1 = 0;
+                    var c_1 = [];
+                    indices_1.sort().forEach(function (v) {
+                        c_1.push(pageContent.slice(a_1, v));
+                        a_1 = v;
+                    });
+                    c_1.push(pageContent.slice(a_1));
+                    pageContent = c_1.join('\\');
+                }
                 page.outerContainerElem.id = 'qpresent-page-' + index;
                 page.pageContentElem.innerHTML = makePageContent(pageContent, colDelim, blockDelim);
                 page.pageElem.appendChild(makePageNumber(_this, index + 1, pages.length));
@@ -363,6 +398,7 @@ var QPresent;
             var w = this.pageSize[0] * r;
             var h = this.pageSize[1] * r;
             this.pages[pageIndex].pageElem.style.transform = "scale(" + r + ", " + r + ")";
+            this.pages[pageIndex].pageContentElem.style.height = this.pageSize[1] + "px";
             this.pages[pageIndex].pageContentElem.style.minHeight = this.pageSize[1] + "px";
             this.pages[pageIndex].pageContentElem.style.maxHeight = this.pageSize[1] + "px";
             this.pages[pageIndex].innerContainerElem.style.width = w + "px";
