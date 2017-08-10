@@ -283,7 +283,9 @@ module QPresent {
             if (matched) {
                 let dest: HTMLElement;
 
-                if (!prevNode || prevNode.nodeType != Node.ELEMENT_NODE) {
+                if (!prevNode) {
+                    dest = node.parentElement;
+                } else if (prevNode.nodeType != Node.ELEMENT_NODE) {
                     if (prevNode.nodeType == Node.TEXT_NODE && /(?:\r?\n)+/.test(prevNode.textContent)) {
                         if (prevNode.previousSibling
                             && prevNode.previousSibling.nodeType == Node.ELEMENT_NODE
