@@ -270,6 +270,12 @@ var QPresent;
         function Manager(elem, content, options) {
             if (options === void 0) { options = defaultOption; }
             var _this = this;
+            this.zoomScale = 1.0;
+            this.currentPopup = [{
+                    popupElem: document.createElement('div'),
+                    closeButtonElem: document.createElement('div'),
+                    contentElem: document.createElement('div')
+                }, false];
             options = Object.assign(QPresentOption["default"](), options);
             this.element = elem;
             this.pages = [];
@@ -339,6 +345,30 @@ var QPresent;
             prevButton.addEventListener('click', function (e) { return _this.prevPage(); });
             nextButton.addEventListener('click', function (e) { return _this.nextPage(); });
             this.currentPage = 0;
+            this.currentPopup[1] = false;
+            this.currentPopup[0].popupElem.tabIndex = 0;
+            this.currentPopup[0].popupElem.classList.add('qpresent-popup');
+            this.currentPopup[0].closeButtonElem.classList.add('qpresent-popup-close');
+            this.currentPopup[0].contentElem.classList.add('qpresent-popup-content');
+            var keydown = function (e) {
+                if (_this.currentPopup[1] && e.keyCode === 0x1b) {
+                    _this.currentPopup[0].closeButtonElem.click();
+                    e.preventDefault();
+                }
+            };
+            this.currentPopup[0].closeButtonElem.addEventListener('click', function () {
+                _this.pages.forEach(function (v) {
+                    v.pageElem.classList.remove('qpresent-popup-blur');
+                });
+                //window.removeEventListener('keydown', keydown);
+                _this.currentPopup[0].popupElem.remove();
+                _this.focus();
+                _this.currentPopup[1] = false;
+            });
+            window.addEventListener('keydown', keydown);
+            this.currentPopup[0].closeButtonElem.innerText = 'Close';
+            this.currentPopup[0].popupElem.appendChild(this.currentPopup[0].closeButtonElem);
+            this.currentPopup[0].popupElem.appendChild(this.currentPopup[0].contentElem);
             setTimeout(function () {
                 for (var _i = 0, _a = _this.pages; _i < _a.length; _i++) {
                     var p = _a[_i];
@@ -352,7 +382,7 @@ var QPresent;
             this.pages[this.currentPage].outerContainerElem.style.display = 'none';
             this.pages[pageIndex].outerContainerElem.style.display = 'block';
             this.currentPage = pageIndex;
-            this.resizeCurrentPage();
+            this.zoom(this.zoomScale);
             this.pages[pageIndex].pageContentElem.focus();
         };
         Manager.prototype.nextPage = function () {
@@ -364,6 +394,9 @@ var QPresent;
             if (this.currentPage > 0) {
                 this.jumpTo(this.currentPage - 1);
             }
+        };
+        Manager.prototype.focus = function () {
+            this.pages[this.currentPage].pageContentElem.focus();
         };
         Manager.prototype.requestFullscreen = function () {
             var element = document.documentElement;
@@ -385,19 +418,36 @@ var QPresent;
                 }
             }
         };
-        Manager.prototype.onResize = function () {
-            var w = document.documentElement.clientWidth;
-            var h = document.documentElement.clientHeight;
-            if (w / h > this.pageSize[0] / this.pageSize[1]) {
-                this.zoomRate = h / this.pageSize[1];
+        Manager.prototype.zoom = function (zoomScale) {
+            if (zoomScale === void 0) { zoomScale = 1.0; }
+            this.zoomScale = zoomScale;
+            if (zoomScale === 1.0) {
+                var style = this.pages[this.currentPage].outerContainerElem.style;
+                style.margin = '';
+                style = this.overlayElem.style;
+                style.margin = '';
             }
             else {
-                this.zoomRate = w / this.pageSize[0];
+                var style = this.pages[this.currentPage].outerContainerElem.style;
+                style.margin = '0';
+                style = this.overlayElem.style;
+                style.margin = '0';
+            }
+            this.onResize();
+        };
+        Manager.prototype.onResize = function () {
+            var w = document.documentElement.clientWidth * this.zoomScale;
+            var h = document.documentElement.clientHeight * this.zoomScale;
+            if (w / h > this.pageSize[0] / this.pageSize[1]) {
+                this.scale = h / this.pageSize[1];
+            }
+            else {
+                this.scale = w / this.pageSize[0];
             }
             this.resizeCurrentPage();
         };
         Manager.prototype.resizePage = function (pageIndex) {
-            var r = this.zoomRate;
+            var r = this.scale;
             var w = this.pageSize[0] * r;
             var h = this.pageSize[1] * r;
             this.pages[pageIndex].pageElem.style.transform = "scale(" + r + ", " + r + ")";
@@ -411,12 +461,25 @@ var QPresent;
             this.buttonContainer.style.transform = "scale(" + r + ", " + r + ")";
             this.overlayElem.style.width = w + "px";
             this.overlayElem.style.height = h + "px";
+            this.overlayElem.style.fontSize = h / 32 + "px";
         };
         Manager.prototype.resizeCurrentPage = function () {
             this.resizePage(this.currentPage);
         };
+        Manager.prototype.newPopup = function () {
+            if (this.currentPopup[1])
+                this.currentPopup[0].closeButtonElem.click();
+            this.pages.forEach(function (v) {
+                v.pageElem.classList.add('qpresent-popup-blur');
+            });
+            this.currentPopup[1] = true;
+            this.currentPopup[0].contentElem.innerHTML = '';
+            this.overlayElem.appendChild(this.currentPopup[0].popupElem);
+            this.currentPopup[0].popupElem.focus();
+            return this.currentPopup[0];
+        };
         Manager.prototype.beforePrint = function () {
-            this.zoomRate = 1;
+            this.scale = 1;
             for (var i = 0; i < this.pages.length; ++i) {
                 this.pages[i].outerContainerElem.style.display = 'block';
                 this.resizePage(i);

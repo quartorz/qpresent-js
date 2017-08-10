@@ -51,6 +51,12 @@ module QPresent {
         pageContentElem: HTMLElement;
     }
 
+    interface Popup {
+        popupElem: HTMLElement;
+        closeButtonElem: HTMLElement;
+        contentElem: HTMLElement;
+    }
+
     function newPage() {
         let pageOuterContElem: HTMLDivElement = document.createElement('div');
         let pageInnerContElem: HTMLDivElement = document.createElement('div');
@@ -370,6 +376,11 @@ module QPresent {
         overlayElem: HTMLElement;
         buttonContainer: HTMLElement;
         zoomScale: number = 1.0;
+        currentPopup: [Popup, boolean] = [{
+            popupElem: document.createElement('div'),
+            closeButtonElem: document.createElement('div'),
+            contentElem: document.createElement('div'),
+        }, false];
 
         constructor(elem: HTMLElement, content: string, options: QPresentOption = defaultOption) {
             options = Object.assign(QPresentOption.default(), options);
@@ -466,6 +477,34 @@ module QPresent {
             nextButton.addEventListener('click', e => this.nextPage());
 
             this.currentPage = 0;
+
+            this.currentPopup[1] = false;
+
+            this.currentPopup[0].popupElem.tabIndex = 0;
+            this.currentPopup[0].popupElem.classList.add('qpresent-popup');
+            this.currentPopup[0].closeButtonElem.classList.add('qpresent-popup-close');
+            this.currentPopup[0].contentElem.classList.add('qpresent-popup-content');
+
+            let keydown = (e: KeyboardEvent) => {
+                if (this.currentPopup[1] && e.keyCode === 0x1b){
+                    this.currentPopup[0].closeButtonElem.click();
+                    e.preventDefault();
+                }
+            };
+
+            this.currentPopup[0].closeButtonElem.addEventListener('click', () => {
+                this.pages.forEach((v) => {
+                    v.pageElem.classList.remove('qpresent-popup-blur');
+                });
+                //window.removeEventListener('keydown', keydown);
+                this.currentPopup[0].popupElem.remove();
+                this.focus();
+                this.currentPopup[1] = false;
+            });
+            window.addEventListener('keydown', keydown);
+            this.currentPopup[0].closeButtonElem.innerText = 'Close';
+            this.currentPopup[0].popupElem.appendChild(this.currentPopup[0].closeButtonElem);
+            this.currentPopup[0].popupElem.appendChild(this.currentPopup[0].contentElem);
 
             setTimeout(() => {
                 for (let p of this.pages)
@@ -571,10 +610,26 @@ module QPresent {
             this.buttonContainer.style.transform = `scale(${r}, ${r})`;
             this.overlayElem.style.width = `${w}px`;
             this.overlayElem.style.height = `${h}px`;
+            this.overlayElem.style.fontSize = `${h/32}px`;
         }
 
         private resizeCurrentPage() {
             this.resizePage(this.currentPage);
+        }
+
+        newPopup() {
+            if (this.currentPopup[1]) this.currentPopup[0].closeButtonElem.click();
+
+            this.pages.forEach((v) => {
+                v.pageElem.classList.add('qpresent-popup-blur');
+            });
+
+            this.currentPopup[1] = true;
+            this.currentPopup[0].contentElem.innerHTML = '';
+            this.overlayElem.appendChild(this.currentPopup[0].popupElem);
+            this.currentPopup[0].popupElem.focus();
+
+            return this.currentPopup[0];
         }
 
         beforePrint() {
