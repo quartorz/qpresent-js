@@ -366,9 +366,10 @@ module QPresent {
         pages: Page[];
         currentPage: number;
         pageSize: [number, number];
-        zoomRate: number;
+        scale: number;
         overlayElem: HTMLElement;
         buttonContainer: HTMLElement;
+        zoomScale: number = 1.0;
 
         constructor(elem: HTMLElement, content: string, options: QPresentOption = defaultOption) {
             options = Object.assign(QPresentOption.default(), options);
@@ -478,7 +479,7 @@ module QPresent {
             this.pages[this.currentPage].outerContainerElem.style.display = 'none';
             this.pages[pageIndex].outerContainerElem.style.display = 'block';
             this.currentPage = pageIndex;
-            this.resizeCurrentPage();
+            this.zoom(this.zoomScale);
 
             this.pages[pageIndex].pageContentElem.focus();
         }
@@ -493,6 +494,10 @@ module QPresent {
             if (this.currentPage > 0) {
                 this.jumpTo(this.currentPage - 1);
             }
+        }
+
+        focus() {
+            this.pages[this.currentPage].pageContentElem.focus();
         }
 
         requestFullscreen() {
@@ -519,21 +524,39 @@ module QPresent {
             }
         }
 
+        zoom(zoomScale: number = 1.0) {
+            this.zoomScale = zoomScale;
+
+            if (zoomScale === 1.0) {
+                let style = this.pages[this.currentPage].outerContainerElem.style;
+                style.margin = '';
+                style = this.overlayElem.style;
+                style.margin = '';
+            } else {
+                let style = this.pages[this.currentPage].outerContainerElem.style;
+                style.margin = '0';
+                style = this.overlayElem.style;
+                style.margin = '0';
+            }
+
+            this.onResize();
+        }
+
         onResize() {
-            let w = document.documentElement.clientWidth;
-            let h = document.documentElement.clientHeight;
+            let w = document.documentElement.clientWidth * this.zoomScale;
+            let h = document.documentElement.clientHeight * this.zoomScale;
 
             if (w / h > this.pageSize[0] / this.pageSize[1]) {
-                this.zoomRate = h / this.pageSize[1];
+                this.scale = h / this.pageSize[1];
             } else {
-                this.zoomRate = w / this.pageSize[0];
+                this.scale = w / this.pageSize[0];
             }
 
             this.resizeCurrentPage();
         }
 
         private resizePage(pageIndex: number) {
-            let r = this.zoomRate;
+            let r = this.scale;
             let w = this.pageSize[0] * r;
             let h = this.pageSize[1] * r;
 
@@ -555,7 +578,7 @@ module QPresent {
         }
 
         beforePrint() {
-            this.zoomRate = 1;
+            this.scale = 1;
             for (let i = 0; i < this.pages.length; ++i) {
                 this.pages[i].outerContainerElem.style.display = 'block';
                 this.resizePage(i);
