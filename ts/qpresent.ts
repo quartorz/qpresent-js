@@ -368,7 +368,7 @@ module QPresent {
     });
 
     export class Manager {
-        element: HTMLElement;
+        targetElem: HTMLElement;
         pages: Page[];
         currentPage: number;
         pageSize: [number, number];
@@ -382,10 +382,10 @@ module QPresent {
             contentElem: document.createElement('div'),
         }, false];
 
-        constructor(elem: HTMLElement, content: string, options: QPresentOption = defaultOption) {
+        constructor(targetElem: HTMLElement, content: string, options: QPresentOption = defaultOption) {
             options = Object.assign(QPresentOption.default(), options);
 
-            this.element = elem;
+            this.targetElem = targetElem;
             this.pages = [];
             this.pageSize = [options.pageWidth, options.pageHeight];
 
@@ -455,7 +455,7 @@ module QPresent {
                     ignoredTags: []
                 });
 
-                this.element.appendChild(page.outerContainerElem);
+                this.targetElem.appendChild(page.outerContainerElem);
                 this.pages.push(page);
             });
 
@@ -465,7 +465,7 @@ module QPresent {
             this.buttonContainer = makeNavigationButtons();
 
             this.overlayElem.appendChild(this.buttonContainer);
-            this.element.appendChild(this.overlayElem);
+            this.targetElem.appendChild(this.overlayElem);
 
             let prevButton = this.buttonContainer.getElementsByClassName('qpresent-prev-button')[0] as HTMLInputElement;
             let nextButton = this.buttonContainer.getElementsByClassName('qpresent-next-button')[0] as HTMLInputElement;
@@ -496,12 +496,11 @@ module QPresent {
                 this.pages.forEach((v) => {
                     v.pageElem.classList.remove('qpresent-popup-blur');
                 });
-                //window.removeEventListener('keydown', keydown);
                 this.currentPopup[0].popupElem.remove();
                 this.focus();
                 this.currentPopup[1] = false;
             });
-            window.addEventListener('keydown', keydown);
+            targetElem.addEventListener('keydown', keydown);
             this.currentPopup[0].closeButtonElem.innerText = 'Close';
             this.currentPopup[0].popupElem.appendChild(this.currentPopup[0].closeButtonElem);
             this.currentPopup[0].popupElem.appendChild(this.currentPopup[0].contentElem);
@@ -582,8 +581,8 @@ module QPresent {
         }
 
         onResize() {
-            let w = document.documentElement.clientWidth * this.zoomScale;
-            let h = document.documentElement.clientHeight * this.zoomScale;
+            let w = this.targetElem.clientWidth * this.zoomScale;
+            let h = this.targetElem.clientHeight * this.zoomScale;
 
             if (w / h > this.pageSize[0] / this.pageSize[1]) {
                 this.scale = h / this.pageSize[1];
