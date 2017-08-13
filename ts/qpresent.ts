@@ -369,6 +369,7 @@ module QPresent {
 
     export class Manager {
         targetElem: HTMLElement;
+        containerElem: HTMLDivElement;
         pages: Page[];
         currentPage: number;
         pageSize: [number, number];
@@ -388,6 +389,13 @@ module QPresent {
             this.targetElem = targetElem;
             this.pages = [];
             this.pageSize = [options.pageWidth, options.pageHeight];
+            this.containerElem = document.createElement('div');
+
+            targetElem.appendChild(this.containerElem);
+            this.containerElem.style.position = 'relative';
+            this.containerElem.style.display = 'inline-block';
+            this.containerElem.style.height = '100%';
+            this.containerElem.style.width = '100%';
 
             let pageDelim = new RegExp(options.pageDelimiter, 'm');
             let colDelim = new RegExp(`((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}`, 'mg');
@@ -455,7 +463,7 @@ module QPresent {
                     ignoredTags: []
                 });
 
-                this.targetElem.appendChild(page.outerContainerElem);
+                this.containerElem.appendChild(page.outerContainerElem);
                 this.pages.push(page);
             });
 
@@ -465,7 +473,7 @@ module QPresent {
             this.buttonContainer = makeNavigationButtons();
 
             this.overlayElem.appendChild(this.buttonContainer);
-            this.targetElem.appendChild(this.overlayElem);
+            this.containerElem.appendChild(this.overlayElem);
 
             let prevButton = this.buttonContainer.getElementsByClassName('qpresent-prev-button')[0] as HTMLInputElement;
             let nextButton = this.buttonContainer.getElementsByClassName('qpresent-next-button')[0] as HTMLInputElement;
