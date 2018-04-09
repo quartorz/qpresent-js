@@ -5,7 +5,7 @@
 var QPresent;
 (function (QPresent) {
     'use strict';
-    var QPresentOption = (function () {
+    var QPresentOption = /** @class */ (function () {
         function QPresentOption() {
         }
         QPresentOption["default"] = function () {
@@ -266,7 +266,7 @@ var QPresent;
     marked.setOptions({
         renderer: renderer
     });
-    var Manager = (function () {
+    var Manager = /** @class */ (function () {
         function Manager(targetElem, content, options) {
             if (options === void 0) { options = defaultOption; }
             var _this = this;
@@ -282,10 +282,7 @@ var QPresent;
             this.pageSize = [options.pageWidth, options.pageHeight];
             this.containerElem = document.createElement('div');
             targetElem.appendChild(this.containerElem);
-            this.containerElem.style.position = 'relative';
-            this.containerElem.style.display = 'inline-block';
-            this.containerElem.style.height = '100%';
-            this.containerElem.style.width = '100%';
+            this.containerElem.classList.add('qpresent-container');
             var pageDelim = new RegExp(options.pageDelimiter, 'm');
             var colDelim = new RegExp("((?:\r|\n|\u2028|\u2029|.)*?)" + options.columnDelimiter + "((?:\r|\n|\u2028|\u2029|.)*?)" + options.columnDelimiter + "((?:\r|\n|\u2028|\u2029|.)*?)" + options.columnDelimiter, 'mg');
             var blockDelim = new RegExp("((?:\r|\n|\u2028|\u2029|.)*?)" + options.blockDelimiter + "((?:\r|\n|\u2028|\u2029|.)*?)" + options.blockDelimiter + "((?:\r|\n|\u2028|\u2029|.)*?)" + options.blockDelimiter, 'mg');
@@ -331,11 +328,13 @@ var QPresent;
                 page.pageElem.appendChild(makePageNumber(_this, index + 1, pages.length));
                 page.pageElem.style.width = options.pageWidth + "px";
                 page.pageElem.style.height = options.pageHeight + "px";
-                addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
-                renderMathInElement(page.pageElem, {
-                    delimiters: options.mathDelimiter,
-                    ignoredTags: []
-                });
+                if (page.pageContentElem.childNodes.length !== 0) {
+                    addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
+                    renderMathInElement(page.pageElem, {
+                        delimiters: options.mathDelimiter,
+                        ignoredTags: []
+                    });
+                }
                 _this.containerElem.appendChild(page.outerContainerElem);
                 _this.pages.push(page);
             });
@@ -380,7 +379,7 @@ var QPresent;
                     p.outerContainerElem.style.display = 'none';
                 }
                 _this.onResize();
-                _this.jumpTo(0);
+                _this.jumpTo(_this.currentPage);
             }, 1);
         }
         Manager.prototype.jumpTo = function (pageIndex) {
@@ -404,13 +403,12 @@ var QPresent;
             this.pages[this.currentPage].pageContentElem.focus();
         };
         Manager.prototype.requestFullscreen = function () {
-            var element = document.documentElement;
-            var method = element.requestFullscreen ||
-                element.webkitRequestFullScreen ||
-                element.webkitRequestFullscreen ||
-                element.mozRequestFullScreen;
+            var method = this.targetElem.requestFullscreen ||
+                this.targetElem.webkitRequestFullScreen ||
+                this.targetElem.webkitRequestFullscreen ||
+                this.targetElem.mozRequestFullScreen;
             if (method) {
-                method.call(element);
+                method.call(this.targetElem);
             }
         };
         Manager.prototype.exitFullscreen = function () {

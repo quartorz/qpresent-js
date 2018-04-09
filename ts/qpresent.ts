@@ -12,6 +12,11 @@ interface HTMLElement {
     mozRequestFullScreen: () => void;
 }
 
+interface Window {
+    onbeforeprint: any;
+    onafterprint: any;
+}
+
 module QPresent {
     'use strict';
 
@@ -98,9 +103,9 @@ module QPresent {
 
             result += marked(e[1]);
 
-            let container = document.createElement('div');
-            let left = document.createElement('div');
-            let right = document.createElement('div');
+            const container = document.createElement('div');
+            const left = document.createElement('div');
+            const right = document.createElement('div');
 
             container.classList.add('qpresent-twocol-container');
             left.classList.add('qpresent-twocol-left');
@@ -121,7 +126,7 @@ module QPresent {
     }
 
     function makePageContent(content: string, colDelim: RegExp, blockDelim: RegExp): string {
-        let c = content.replace(/\\\r?\n\s*/g, '').replace(/([^\\])~/g, '$1<span class="qpresent-space">&nbsp;</span>').replace(/\\~/g, '~');
+        const c = content.replace(/\\\r?\n\s*/g, '').replace(/([^\\])~/g, '$1<span class="qpresent-space">&nbsp;</span>').replace(/\\~/g, '~');
 
         let e: RegExpExecArray;
         let lastIndex: number;
@@ -137,14 +142,14 @@ module QPresent {
 
             content += makeColumn(e[1], colDelim);
 
-            let blockElem = document.createElement('div');
-            let bodyElem = document.createElement('div');
+            const blockElem = document.createElement('div');
+            const bodyElem = document.createElement('div');
 
             blockElem.classList.add('block');
             bodyElem.classList.add('block-body');
 
             if (e[2].trim().length != 0) {
-                let titleElem = document.createElement('div');
+                const titleElem = document.createElement('div');
                 titleElem.classList.add('block-title');
                 titleElem.innerHTML = e[2];
                 blockElem.appendChild(titleElem);
@@ -162,10 +167,10 @@ module QPresent {
     }
 
     function makePageNumber(manager: Manager, index: number, totalNum: number): HTMLElement {
-        let pageNum = document.createElement('span');
-        let currentNumElem = document.createElement('span');
-        let separatorElem = document.createElement('span');
-        let totalNumElem = document.createElement('span');
+        const pageNum = document.createElement('span');
+        const currentNumElem = document.createElement('span');
+        const separatorElem = document.createElement('span');
+        const totalNumElem = document.createElement('span');
 
         pageNum.classList.add('qpresent-page-number');
         currentNumElem.classList.add('qpresent-page-number-current');
@@ -182,7 +187,7 @@ module QPresent {
         pageNum.appendChild(separatorElem);
         pageNum.appendChild(totalNumElem);
 
-        let onConfirm = () => {
+        const onConfirm = () => {
             let n = parseInt(currentNumElem.innerText);
             currentNumElem.innerText = index.toString();
             if (isFinite(n)) {
@@ -219,10 +224,10 @@ module QPresent {
     }
 
     function makeNavigationButtons(): HTMLElement {
-        let container = document.createElement('span');
-        let prev = document.createElement('input');
-        let buttonSep = document.createElement('span');
-        let next = document.createElement('input');
+        const container = document.createElement('span');
+        const prev = document.createElement('input');
+        const buttonSep = document.createElement('span');
+        const next = document.createElement('input');
 
         container.classList.add('qpresent-navigation-button-container');
         prev.classList.add('qpresent-prev-button', 'qpresent-navigation-button');
@@ -242,9 +247,9 @@ module QPresent {
         return container;
     }
 
-    let slideAttrRegExp = /^\s*.slide:\s*/g;
-    let elementAttrRegExp = /^\s*.element:\s*/g;
-    let attributeRegExp = /\s*(.*?)="(.*?)"/g;
+    const slideAttrRegExp = /^\s*.slide:\s*/g;
+    const elementAttrRegExp = /^\s*.element:\s*/g;
+    const attributeRegExp = /\s*(.*?)="(.*?)"/g;
 
     function addAttributesInElement(elem: HTMLElement, attr: string) {
         attributeRegExp.lastIndex = 0;
@@ -276,7 +281,7 @@ module QPresent {
         if (node.nodeType == Node.COMMENT_NODE) {
             slideAttrRegExp.lastIndex = 0;
 
-            let elem = node as Comment;
+            const elem = node as Comment;
             let matched = slideAttrRegExp.test(elem.data);
 
             if (matched) {
@@ -330,23 +335,23 @@ module QPresent {
         }
     }
 
-    let userAgent = window.navigator.userAgent.toLowerCase();
-    let isIE = (userAgent.indexOf('msie') != -1) || (userAgent.indexOf('trident') != -1);
-    let isEdge = userAgent.indexOf('edge') != -1;
-    let isChrome = !isEdge && userAgent.indexOf('chrome') != -1;
-    let isSafari = !isEdge && !isChrome && userAgent.indexOf('safari') != -1;
-    let isFirefox = userAgent.indexOf('firefox') != -1;
-    let isOpera = userAgent.indexOf('opera') != -1;
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isIE = (userAgent.indexOf('msie') != -1) || (userAgent.indexOf('trident') != -1);
+    const isEdge = userAgent.indexOf('edge') != -1;
+    const isChrome = !isEdge && userAgent.indexOf('chrome') != -1;
+    const isSafari = !isEdge && !isChrome && userAgent.indexOf('safari') != -1;
+    const isFirefox = userAgent.indexOf('firefox') != -1;
+    const isOpera = userAgent.indexOf('opera') != -1;
 
     var renderer = new marked.Renderer();
 
     renderer.code = function(code, language) {
-        let table = document.createElement('table');
-        let tr = document.createElement('tr');
-        let lineNums = document.createElement('td');
-        let lineNumsContainer = document.createElement('pre');
-        let codeElem = document.createElement('td');
-        let lineCount = code.split('\n').length;
+        const table = document.createElement('table');
+        const tr = document.createElement('tr');
+        const lineNums = document.createElement('td');
+        const lineNumsContainer = document.createElement('pre');
+        const codeElem = document.createElement('td');
+        const lineCount = code.split('\n').length;
 
         lineNumsContainer.classList.add('qpresent-line-number-container');
         lineNumsContainer.innerHTML += '<span class="qpresent-line-number"></span>\n'.repeat(lineCount);
@@ -392,22 +397,19 @@ module QPresent {
             this.containerElem = document.createElement('div');
 
             targetElem.appendChild(this.containerElem);
-            this.containerElem.style.position = 'relative';
-            this.containerElem.style.display = 'inline-block';
-            this.containerElem.style.height = '100%';
-            this.containerElem.style.width = '100%';
+            this.containerElem.classList.add('qpresent-container');
 
-            let pageDelim = new RegExp(options.pageDelimiter, 'm');
-            let colDelim = new RegExp(`((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}`, 'mg');
-            let blockDelim = new RegExp(`((?:\r|\n|\u2028|\u2029|.)*?)${options.blockDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.blockDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.blockDelimiter}`, 'mg');
-            let pages = content.split(pageDelim);
+            const pageDelim = new RegExp(options.pageDelimiter, 'm');
+            const colDelim = new RegExp(`((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.columnDelimiter}`, 'mg');
+            const blockDelim = new RegExp(`((?:\r|\n|\u2028|\u2029|.)*?)${options.blockDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.blockDelimiter}((?:\r|\n|\u2028|\u2029|.)*?)${options.blockDelimiter}`, 'mg');
+            const pages = content.split(pageDelim);
 
             pages.forEach((pageContent, index) => {
-                let page = newPage();
+                const page = newPage();
 
                 if (options.mathAutoEscape) {
-                    let indices: number[] = [];
-                    let char = /\\|_|\*/g;
+                    const indices: number[] = [];
+                    const char = /\\|_|\*/g;
 
                     options.mathDelimiter.forEach((v) => {
                         let begin = pageContent.indexOf(v.left);
@@ -439,7 +441,7 @@ module QPresent {
                     });
 
                     let a = 0;
-                    let c: string[] = [];
+                    const c: string[] = [];
 
                     indices.sort().forEach((v) => {
                         c.push(pageContent.slice(a, v));
@@ -456,12 +458,14 @@ module QPresent {
                 page.pageElem.style.width = `${options.pageWidth}px`;
                 page.pageElem.style.height = `${options.pageHeight}px`;
 
-                addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
+                if (page.pageContentElem.childNodes.length !== 0) {
+                    addAttributes(page.pageContentElem, page.pageContentElem.firstChild, null);
 
-                renderMathInElement(page.pageElem, {
-                    delimiters: options.mathDelimiter,
-                    ignoredTags: []
-                });
+                    renderMathInElement(page.pageElem, {
+                        delimiters: options.mathDelimiter,
+                        ignoredTags: [],
+                    });
+                }
 
                 this.containerElem.appendChild(page.outerContainerElem);
                 this.pages.push(page);
@@ -475,8 +479,8 @@ module QPresent {
             this.overlayElem.appendChild(this.buttonContainer);
             this.containerElem.appendChild(this.overlayElem);
 
-            let prevButton = this.buttonContainer.getElementsByClassName('qpresent-prev-button')[0] as HTMLInputElement;
-            let nextButton = this.buttonContainer.getElementsByClassName('qpresent-next-button')[0] as HTMLInputElement;
+            const prevButton = this.buttonContainer.getElementsByClassName('qpresent-prev-button')[0] as HTMLInputElement;
+            const nextButton = this.buttonContainer.getElementsByClassName('qpresent-next-button')[0] as HTMLInputElement;
 
             prevButton.value = 'prev';
             nextButton.value = 'next';
@@ -493,7 +497,7 @@ module QPresent {
             this.currentPopup[0].closeButtonElem.classList.add('qpresent-popup-close');
             this.currentPopup[0].contentElem.classList.add('qpresent-popup-content');
 
-            let keydown = (e: KeyboardEvent) => {
+            const keydown = (e: KeyboardEvent) => {
                 if (this.currentPopup[1] && e.keyCode === 0x1b){
                     this.currentPopup[0].closeButtonElem.click();
                     e.preventDefault();
@@ -517,7 +521,7 @@ module QPresent {
                 for (let p of this.pages)
                     p.outerContainerElem.style.display = 'none';
                 this.onResize();
-                this.jumpTo(0);
+                this.jumpTo(this.currentPage);
             }, 1);
         }
 
@@ -547,20 +551,19 @@ module QPresent {
         }
 
         requestFullscreen() {
-            let element = document.documentElement;
-            let method = element.requestFullscreen ||
-                element.webkitRequestFullScreen ||
-                element.webkitRequestFullscreen ||
-                element.mozRequestFullScreen;
+            const method = this.targetElem.requestFullscreen ||
+                this.targetElem.webkitRequestFullScreen ||
+                this.targetElem.webkitRequestFullscreen ||
+                this.targetElem.mozRequestFullScreen;
 
             if (method) {
-                method.call(element);
+                method.call(this.targetElem);
             }
         }
 
         exitFullscreen() {
             if (document.fullscreenElement || document.webkitFullscreenElement) {
-                let method = document.exitFullscreen ||
+                const method = document.exitFullscreen ||
                     document.webkitExitFullscreen ||
                     document.mozCancelFullScreen;
 
@@ -589,8 +592,8 @@ module QPresent {
         }
 
         onResize() {
-            let w = this.targetElem.clientWidth * this.zoomScale;
-            let h = this.targetElem.clientHeight * this.zoomScale;
+            const w = this.targetElem.clientWidth * this.zoomScale;
+            const h = this.targetElem.clientHeight * this.zoomScale;
 
             if (w / h > this.pageSize[0] / this.pageSize[1]) {
                 this.scale = h / this.pageSize[1];
@@ -602,9 +605,9 @@ module QPresent {
         }
 
         private resizePage(pageIndex: number) {
-            let r = this.scale;
-            let w = this.pageSize[0] * r;
-            let h = this.pageSize[1] * r;
+            const r = this.scale;
+            const w = this.pageSize[0] * r;
+            const h = this.pageSize[1] * r;
 
             this.pages[pageIndex].pageElem.style.transform = `scale(${r}, ${r})`;
             this.pages[pageIndex].pageContentElem.style.height = `${this.pageSize[1]}px`;
